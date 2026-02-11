@@ -1,4 +1,5 @@
 <?php
+if (!defined('ABSPATH')) exit;
 /**
  * Opciones de Administración
  * @link        https://siroe.cl
@@ -217,13 +218,13 @@ class cWooCatalogoAdmin {
                         <form class="saveconfig" id="fSaveConfigGlobWooCatalogo" method="post">
 
                             <label for="ganancia-woocatalogo">Ganacia</label><br>
-                            <input type="number" id="gan-woocatalogo" name="ganancia-woocatalogo" step="0.0001" value="<?php echo $ganancia; ?>"><br>
+                            <input type="number" id="gan-woocatalogo" name="ganancia-woocatalogo" step="0.0001" value="<?php echo esc_attr($ganancia); ?>"><br>
 
                             <label for="comision-woocatalogo">Comisión</label><br>
-                            <input type="number" id="comision-woocatalogo" name="comision-woocatalogo" step="0.0001" value="<?php echo $comision; ?>"><br>
+                            <input type="number" id="comision-woocatalogo" name="comision-woocatalogo" step="0.0001" value="<?php echo esc_attr($comision); ?>"><br>
 
                             <label for="dolar-woocatalogo">Dolar</label><br>
-                            <input type="number" id="dolar-woocatalogo" name="dolar-woocatalogo" step="0.0001" value="<?php echo $dolar; ?>"><br>
+                            <input type="number" id="dolar-woocatalogo" name="dolar-woocatalogo" step="0.0001" value="<?php echo esc_attr($dolar); ?>"><br>
 
                             <label for="categories-woocatalogo">Etiquetas</label><br>
                                 <select name="categories-woocatalogo" id="categories-woocatalogo" style="width:100%">
@@ -231,7 +232,7 @@ class cWooCatalogoAdmin {
                                     $all_tags = get_terms ('product_tag');
                                     if($all_tags){
                                         foreach ($all_tags as $tag) {
-                                            echo ' <option value="'.$tag->name.'">'.$tag->name.'</option>';
+                                            echo ' <option value="'.esc_attr($tag->name).'">'.esc_html($tag->name).'</option>';
                                         } 
                                     }else{
                                         echo ' <option value="false">Sin resultados</option>';
@@ -268,13 +269,13 @@ class cWooCatalogoAdmin {
                                 foreach ($aOptionsWooCatalogo as $option_woocatalogo) {
 
                                     echo "<tr>";
-                                        echo "<td>".$option_woocatalogo["id"]."</td>";
-                                        echo "<td>".$option_woocatalogo["dolar"]."</td>";
-                                        echo "<td>".$option_woocatalogo["fmult"]."</td>";
-                                        echo "<td>".$option_woocatalogo["comision"]."</td>";
-                                        echo "<td>".$option_woocatalogo["etiquetas_precio"]."</td>";
-                                        echo "<td>".$option_woocatalogo["reg_date"]."</td>";
-                                        echo "<td style='text-align: center;'><button type='button' onclick='fDeleteConfigWooCatalogo(".$option_woocatalogo["id"].")'><span class='dashicons dashicons-remove'></span></button></td>";
+                                        echo "<td>".esc_html($option_woocatalogo["id"])."</td>";
+                                        echo "<td>".esc_html($option_woocatalogo["dolar"])."</td>";
+                                        echo "<td>".esc_html($option_woocatalogo["fmult"])."</td>";
+                                        echo "<td>".esc_html($option_woocatalogo["comision"])."</td>";
+                                        echo "<td>".esc_html($option_woocatalogo["etiquetas_precio"])."</td>";
+                                        echo "<td>".esc_html($option_woocatalogo["reg_date"])."</td>";
+                                        echo "<td style='text-align: center;'><button type='button' onclick='fDeleteConfigWooCatalogo(".intval($option_woocatalogo["id"]).")'><span class='dashicons dashicons-remove'></span></button></td>";
                                     echo "</tr>";
 
                                 }
@@ -355,14 +356,14 @@ class cWooCatalogoAdmin {
                 ?>
                     <tr>
                         <td><?php echo $id; ?></td>
-                        <td><?php echo $sku; ?></td>
-                        <td><?php echo $name; ?></td>
-                        <td><?php echo $stock; ?></td>
-                        <td><?php echo $price; ?></td>
+                        <td><?php echo esc_html($sku); ?></td>
+                        <td><?php echo esc_html($name); ?></td>
+                        <td><?php echo esc_html($stock); ?></td>
+                        <td><?php echo esc_html($price); ?></td>
                         <td><?php echo $type; ?></td>
                         <td><?php echo $categories; ?></td>
                         <td><a href="<?php echo $product_link; ?>" target="_blank">Ver Producto</a></td>
-                        <td><?php echo $partnumber; ?></td>
+                        <td><?php echo esc_html($partnumber); ?></td>
                         <!--<td><button class="accionBtn" data-id="<?php echo $id; ?>"><span class='dashicons dashicons-search'></span>Buscar ficha tecnica</button></td>-->
                         <td><button type="button" onclick="fUpdateAtrrWooCatalogo('<?php echo $partnumberv2 = ($partnumber != 'Sin partnumber') ? $partnumber : $sku ; ?>')"><span class="dashicons dashicons-search"></span>Buscar ficha tecnica</button></td>
                     </tr>
@@ -405,17 +406,20 @@ class cWooCatalogoAdmin {
     public static function fSaveConfigGlobalWooCatalogo($nonce) {
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
 
         global $wpdb;
-        $aDataNumberWooCatalogo = $_POST['dataNumberWooCatalogo'];
-        $sfmultWooCatalogo      = $aDataNumberWooCatalogo[0]['value'];
-        $sComWooCatalogo        = $aDataNumberWooCatalogo[1]['value'];
-        $sDolarWooCatalogo      = $aDataNumberWooCatalogo[2]['value'];
-        $aTagWooCatalogo        = $aDataNumberWooCatalogo[3]['value'];
-        $dTimeWooCatalogo       = date("Y-m-d H:i:s");
+        $aDataNumberWooCatalogo = isset($_POST['dataNumberWooCatalogo']) ? $_POST['dataNumberWooCatalogo'] : array();
+        $sfmultWooCatalogo      = isset($aDataNumberWooCatalogo[0]['value']) ? floatval($aDataNumberWooCatalogo[0]['value']) : 0;
+        $sComWooCatalogo        = isset($aDataNumberWooCatalogo[1]['value']) ? floatval($aDataNumberWooCatalogo[1]['value']) : 0;
+        $sDolarWooCatalogo      = isset($aDataNumberWooCatalogo[2]['value']) ? floatval($aDataNumberWooCatalogo[2]['value']) : 0;
+        $aTagWooCatalogo        = isset($aDataNumberWooCatalogo[3]['value']) ? sanitize_text_field($aDataNumberWooCatalogo[3]['value']) : '';
+        $dTimeWooCatalogo       = current_time('mysql');
         $sTableWooCatalogo      = $wpdb->prefix.'woocatalogo';
         $qWooCatalogo           = "SELECT * FROM $sTableWooCatalogo";
         $sResWooCatalogo        = $wpdb->get_results($qWooCatalogo, ARRAY_A);
@@ -424,7 +428,7 @@ class cWooCatalogoAdmin {
 
         if ($aResTagWooCatalogo === 0 || $aResTagWooCatalogo > 0) {
 
-            $wpdb->query($wpdb->prepare("UPDATE $sTableWooCatalogo SET `dolar` = $sDolarWooCatalogo, `fmult` = $sfmultWooCatalogo, `comision` = $sComWooCatalogo WHERE `etiquetas_precio` = '$aTagWooCatalogo'"));
+            $wpdb->query($wpdb->prepare("UPDATE {$sTableWooCatalogo} SET `dolar` = %f, `fmult` = %f, `comision` = %f WHERE `etiquetas_precio` = %s", $sDolarWooCatalogo, $sfmultWooCatalogo, $sComWooCatalogo, $aTagWooCatalogo));
             echo "Actualizado";
             wp_die();
 
@@ -447,8 +451,11 @@ class cWooCatalogoAdmin {
     public static function fDeleteConfigGlobalWooCatalogo($nonce) {
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
 
         $idreg = isset($_POST['idreg']) ? sanitize_text_field($_POST['idreg']) : '';
@@ -469,8 +476,11 @@ class cWooCatalogoAdmin {
     public static function fSaveLicenseWooCatalogo($nonce){
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
         $aDataLicenseWooCatalogo = $_POST['dataLicenseWooCatalogo'];
         
@@ -495,41 +505,60 @@ class cWooCatalogoAdmin {
     
     public static function fPluginActivationWooCatalogo() {
         global $wpdb;
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        // Crear tabla de etiquetas si no existe
-        $wpdb->query("
-            CREATE TABLE IF NOT EXISTS {$wpdb->prefix}woocatalogo (
-                id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                dolar FLOAT NOT NULL,
-                fmult FLOAT NOT NULL,
-                comision FLOAT NOT NULL,
-                etiquetas_precio VARCHAR(255) NOT NULL,
-                reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        ");
-    
-        // Insertar valores por defecto en la tabla de etiquetas
-        $wpdb->query("
-            INSERT INTO {$wpdb->prefix}woocatalogo 
-            (dolar, fmult, comision, etiquetas_precio) 
-            VALUES ('90000000', '1.12', '1.21', 'Bodega Externa')
-        ");
+        $table_name = $wpdb->prefix . 'woocatalogo';
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE {$table_name} (
+            id INT(6) UNSIGNED NOT NULL AUTO_INCREMENT,
+            dolar FLOAT NOT NULL,
+            fmult FLOAT NOT NULL,
+            comision FLOAT NOT NULL,
+            etiquetas_precio VARCHAR(255) NOT NULL,
+            reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id)
+        ) {$charset_collate};";
+
+        dbDelta($sql);
+
+        // Only insert defaults if table is empty
+        $count = $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
+        if ($count == 0) {
+            $wpdb->insert(
+                $table_name,
+                array(
+                    'dolar' => 90000000,
+                    'fmult' => 1.12,
+                    'comision' => 1.21,
+                    'etiquetas_precio' => 'Bodega Externa'
+                ),
+                array('%f', '%f', '%f', '%s')
+            );
+        }
     }
     
 
 	public static function fPluginDeactivationWooCatalogo() {
-        global $wpdb;
-
-        // Eliminar tabla de etiquetas si existe
-        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}woocatalogo");
+        // No longer drops table on deactivation — data is preserved
+        // Table cleanup is handled in uninstall.php
 	}
 
 
 	public static function fAjaxEndpointWooCatalogo(){
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
+        }
 
-        echo file_get_contents(WOOCATALOGO__PLUGIN_DIR.'admin/dataWooCatalogo/dataWooCatalogo.json');
+        $json_file = WOOCATALOGO__PLUGIN_DIR . 'admin/dataWooCatalogo/dataWooCatalogo.json';
+        if (file_exists($json_file)) {
+            header('Content-Type: application/json');
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file
+            echo file_get_contents($json_file);
+        } else {
+            echo wp_json_encode(array('data' => array()));
+        }
         wp_die();
-
 	}
 }
 

@@ -1,4 +1,5 @@
 <?php
+if (!defined('ABSPATH')) exit;
 
 /**
  * Clases para borrar productos - WooCatalogo
@@ -15,14 +16,16 @@ class cProductWooCatalogo {
     public static function fDeleteProductWooCatalogo($nonce) {
 
         $nonce  = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
         global  $wpdb;
         $part_number   = sanitize_text_field( $_POST['part_number'] );
-        $prefix = $wpdb->prefix;
 
-        $queryIDPost = $wpdb->get_var( $wpdb->prepare("SELECT post_id FROM ".$prefix."postmeta where meta_key='_sku' and meta_value='".$part_number."'"));
+        $queryIDPost = $wpdb->get_var( $wpdb->prepare("SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value = %s", $part_number));
 
         if ($queryIDPost == null) {
             echo "Este producto no esta en Woocommerce"; 
@@ -39,8 +42,11 @@ class cProductWooCatalogo {
 
         $nonce  = sanitize_text_field( $_POST['nonce'] );
         
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
 
         
@@ -192,8 +198,11 @@ class cProductWooCatalogo {
     public static function fInsertProductWooCatalogo($nonce) {
         
         $nonce  = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
         $part_number   =  sanitize_text_field( $_POST['part_number'] );
         $proveedor   =  sanitize_text_field( $_POST['proveedor'] );
@@ -433,19 +442,20 @@ class cProductWooCatalogo {
         $image_name = basename(cProductWooCatalogo::generar_nombre_aleatorio().".jpg");
         $image_path = $upload_dir['path'] . '/' . $image_name;
     
-        // Descargar la imagen desde la URL
-        $image_content = @file_get_contents($image_url);
-        if ($image_content === false) {
+        // Descargar la imagen desde la URL usando wp_remote_get
+        $response = wp_remote_get($image_url, array('timeout' => 30, 'sslverify' => true));
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
             // Si la URL falla, usar la URL de respaldo (picsum.photos)
             error_log("Error: No se pudo descargar la imagen desde la URL: $image_url. Usando URL de respaldo.");
-            $image_content = @file_get_contents($fallback_url);
+            $response = wp_remote_get($fallback_url, array('timeout' => 30, 'sslverify' => true));
     
             // Si la URL de respaldo también falla, registrar el error y detener
-            if ($image_content === false) {
+            if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
                 error_log("Error crítico: No se pudo descargar la imagen de la URL de respaldo: $fallback_url.");
                 return false; // O algún valor que indique el fallo
             }
         }
+        $image_content = wp_remote_retrieve_body($response);
     
         // Guardar la imagen descargada en el directorio de uploads
         file_put_contents($image_path, $image_content);
@@ -510,8 +520,11 @@ class cProductWooCatalogo {
     public static function fPriceShowWooCatalogo($nonce) {
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
         
         $part_number   =  sanitize_text_field( $_POST['part_number'] );
@@ -527,8 +540,11 @@ class cProductWooCatalogo {
     public static function fStockShowWooCatalogo($nonce) {
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
 
         $part_number   =  sanitize_text_field( $_POST['part_number'] );
@@ -542,15 +558,17 @@ class cProductWooCatalogo {
     public static function fPreviewProductWooCatalogo(){
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
 
         $part_number   =  sanitize_text_field( $_POST['part_number'] );
         global  $wpdb;
-        $prefix = $wpdb->prefix;
 
-        $queryIDPost = $wpdb->get_var( $wpdb->prepare("SELECT post_id FROM ".$prefix."postmeta where meta_key='_sku' and meta_value='".$part_number."'"));
+        $queryIDPost = $wpdb->get_var( $wpdb->prepare("SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value = %s", $part_number));
 
         if ($queryIDPost == null) {
             echo "Este producto no esta en Woocommerce";

@@ -1,4 +1,5 @@
 <?php
+if (!defined('ABSPATH')) exit;
 /**
  * Clases de Consulta a Api- WooCatalogo
  * @link        https://siroe.cl

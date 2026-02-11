@@ -1,4 +1,5 @@
 <?php
+if (!defined('ABSPATH')) exit;
 /**
  * Clases para el catalogo - WooCatalogo
  * @link        https://siroe.cl
@@ -15,8 +16,11 @@ class cCatalogWooCatalog {
 
         // Verificar nonce para seguridad desde $_GET
         $nonce = isset($_GET['nonce']) ? sanitize_text_field($_GET['nonce']) : '';
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die("Ajaaaa, estas de noob!");
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
     
         // Delegate CSV generation and download to the API class
@@ -24,12 +28,16 @@ class cCatalogWooCatalog {
     }
 
 
-    public static function fUpdateJsonCatalog($nonce) {
+    public static function fUpdateJsonCatalog($nonce = null, $is_cron = false) {
 
-        $nonce = sanitize_text_field( $_POST['nonce'] );
-
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!$is_cron) {
+            $nonce = sanitize_text_field( $_POST['nonce'] );
+            if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+                wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+            }
+            if (!current_user_can('manage_options')) {
+                wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
+            }
         }
 
         $oCatalogWooCatalogo = (new cWooCatalogoApiRequest())->fgetCatalogWooCatalogo();
@@ -94,11 +102,16 @@ class cCatalogWooCatalog {
 
 
     
-    public static function fUpdatePriceWooCatalogo($nonce) {
+    public static function fUpdatePriceWooCatalogo($nonce = null, $is_cron = false) {
 
-        $nonce  = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!$is_cron) {
+            $nonce  = sanitize_text_field( $_POST['nonce'] );
+            if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+                wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+            }
+            if (!current_user_can('manage_options')) {
+                wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
+            }
         }
 
         $oTagsDB = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
@@ -183,11 +196,16 @@ class cCatalogWooCatalog {
         die(); 
     }
 
-    public static function fUpdateStockWooCatalogo($nonce) {
+    public static function fUpdateStockWooCatalogo($nonce = null, $is_cron = false) {
 
-        $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'segu')) {
-            die ("Ajaaaa, estas de noob!");
+        if (!$is_cron) {
+            $nonce = sanitize_text_field( $_POST['nonce'] );
+            if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+                wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+            }
+            if (!current_user_can('manage_options')) {
+                wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
+            }
         }
 
         $args = array(

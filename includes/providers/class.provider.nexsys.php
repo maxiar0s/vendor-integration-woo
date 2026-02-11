@@ -15,7 +15,8 @@ if (!defined('ABSPATH')) {
 class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
 
     const BASE_URL_TEMPLATE = "https://www.nexsysla.com/:country/wp-json/resellers/v1/";
-    const OPTION_TOKEN_KEY = 'woocatalogo_nexsys_token';
+    const TRANSIENT_TOKEN_KEY = 'woocatalogo_nexsys_token';
+    const TOKEN_EXPIRATION = DAY_IN_SECONDS; // 24 hours
 
     public function getProviderSlug() {
         return 'nexsys';
@@ -38,9 +39,7 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
     public function authenticate() {
         if (empty($this->user_id) || empty($this->password)) return false;
 
-        $token = get_option(self::OPTION_TOKEN_KEY);
-        // Basic validation: if token exists, assume valid. 
-        // In production, we'd check expiration or handle 401.
+        $token = get_transient(self::TRANSIENT_TOKEN_KEY);
         if ($token) {
             return true;
         }
@@ -59,7 +58,7 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
         $response = $this->remoteRequest($url, 'POST', ['Content-Type' => 'application/json'], $body);
 
         if ($response && isset($response['token'])) {
-            update_option(self::OPTION_TOKEN_KEY, $response['token']);
+            set_transient(self::TRANSIENT_TOKEN_KEY, $response['token'], self::TOKEN_EXPIRATION);
             return true;
         }
 
@@ -67,10 +66,10 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
     }
 
     private function getToken() {
-        $token = get_option(self::OPTION_TOKEN_KEY);
+        $token = get_transient(self::TRANSIENT_TOKEN_KEY);
         if (!$token) {
             $this->login();
-            $token = get_option(self::OPTION_TOKEN_KEY);
+            $token = get_transient(self::TRANSIENT_TOKEN_KEY);
         }
         return $token;
     }

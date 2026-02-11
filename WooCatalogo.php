@@ -8,6 +8,7 @@
  * Version:     1.0.0
  * Author:      Siroe
  * Author URI:  https://www.siroe.cl
+ * Text Domain: vendor-integration-woo
  * Domain Path: /languages/
  * 
  */
@@ -23,7 +24,7 @@ if(!defined('ABSPATH')){die('-1');}
 
 define( 'WOOCATALOGO__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WOOCATALOGO__PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'DEBUG_MODE', true);
+define( 'WOOCATALOGO_DEBUG_MODE', true);
 
 require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/class.woocatalogo.php' );
 require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/class.woocatalogo.api.php' );
@@ -34,10 +35,23 @@ require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/interfaces/interface.woocatal
 require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/abstracts/abstract.woocatalogo.provider.php' );
 require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/providers/class.provider.nexsys.php' );
 
+// WooCommerce dependency check
+add_action('plugins_loaded', function() {
+    if ( !class_exists('WooCommerce') ) {
+        add_action('admin_notices', function() {
+            echo '<div class="notice notice-error"><p>';
+            echo esc_html__('Vendor Integration Woo requiere WooCommerce para funcionar. Por favor, instala y activa WooCommerce.', 'vendor-integration-woo');
+            echo '</p></div>';
+        });
+        return;
+    }
+
+    // Only init plugin hooks if WooCommerce is active
+    add_action( 'init', array( 'cWooCatalogo', 'init' ));
+});
+
 register_activation_hook  ( __FILE__, array( 'cWooCatalogoAdmin', 'fPluginActivationWooCatalogo'  ));
 register_deactivation_hook( __FILE__, array( 'cWooCatalogoAdmin', 'fPluginDeactivationWooCatalogo'));
-
-add_action( 'init', array( 'cWooCatalogo', 'init' ));
 
 /////ACTIVAR LA FUNCION CADA CIERTO TIEMPO
 //CREAR EL CRON CUANDO EL PLUGINS SE ACTIVE
@@ -74,24 +88,18 @@ function run_on_deactivate2() {
 }
 register_deactivation_hook( __FILE__, 'run_on_deactivate2' );
 
+// Cron handlers — call methods directly with $is_cron = true to skip nonce verification
 function ActualizarPrecioCatalogCreateNonce(){
-    $_POST['nonce'] = wp_create_nonce( 'segu' );
-    $nonce2 = $_POST['nonce'];
-    cCatalogWooCatalog::fUpdatePriceWooCatalogo($nonce2);
+    cCatalogWooCatalog::fUpdatePriceWooCatalogo(null, true);
 }
 add_action ('CronActualizarCatalogoPrice', 'ActualizarPrecioCatalogCreateNonce', 10, 0);
 
 function ActualizarStockCatalogoCreateNonce(){
-    $_POST['nonce'] = wp_create_nonce( 'segu' );
-    $nonce2 = $_POST['nonce'];
-    cCatalogWooCatalog::fUpdateStockWooCatalogo($nonce2);
-    
+    cCatalogWooCatalog::fUpdateStockWooCatalogo(null, true);
 }
 add_action ('CronActualizarCatalogoStock', 'ActualizarStockCatalogoCreateNonce', 10, 0);
 
 function ActualizarCatalogoCreateNonce(){
-    $_POST['nonce'] = wp_create_nonce( 'segu' );
-    $nonce2 = $_POST['nonce'];
-    cCatalogWooCatalog::fUpdateJsonCatalog($nonce2);
+    cCatalogWooCatalog::fUpdateJsonCatalog(null, true);
 }
 add_action ('CronActualizarCatalogo', 'ActualizarCatalogoCreateNonce', 10, 0);

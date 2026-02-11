@@ -1,4 +1,5 @@
 <?php
+if (!defined('ABSPATH')) exit;
 /**
  * Archivo de inicialización de Hooks
  * @link        https://siroe.cl
@@ -27,14 +28,14 @@ class cWooCatalogo {
 
 
 
-		add_action( 'admin_enqueue_scripts',							    array( 'cWooCatalogo',		  'load_resources' ) );
-        add_action( 'admin_menu',										array( 'cWooCatalogoAdmin',	  'fCreateMenuWooCatalogo' ));
-        add_action( 'admin_menu',										array( 'cWooCatalogoAdmin',	  'fCreateSubMenuWooCatalogo' ));
+		add_action( 'admin_enqueue_scripts',								array( 'cWooCatalogo',		  'load_resources' ) );
+        add_action( 'admin_menu',											array( 'cWooCatalogoAdmin',	  'fCreateMenuWooCatalogo' ));
+        add_action( 'admin_menu',											array( 'cWooCatalogoAdmin',	  'fCreateSubMenuWooCatalogo' ));
 
 		add_action( 'cron_update_price_woocatalogo',					    array( 'cWooCatalogoAdmin',	  'fCreateNonceUpdatePriceWooCatalogo'));
 		add_action( 'cron_update_stock_woocatalogo',					    array( 'cWooCatalogoAdmin',	  'fCreateNonceUpdateStockWooCatalogo'));
 		add_action( 'wp_ajax_datatables_endpoint_woocatalogo',			array( 'cWooCatalogoAdmin',	  'fAjaxEndpointWooCatalogo'));
-		add_action( 'wp_ajax_no_priv_datatables_endpoint_woocatalogo', 	array( 'cWooCatalogoAdmin',	  'fAjaxEndpointWooCatalogo')); 
+		// Removed: wp_ajax_no_priv_ endpoint — DataTables JSON should not be public
 		add_action( 'wp_ajax_save_config_woocatalogo',					array( 'cWooCatalogoAdmin',   'fSaveConfigGlobalWooCatalogo' ));
 		add_action( 'wp_ajax_delete_config_woocatalogo',				    array( 'cWooCatalogoAdmin',   'fDeleteConfigGlobalWooCatalogo' ) );
 		add_action( 'wp_ajax_save_license_woocatalogo',					array( 'cWooCatalogoAdmin',   'fSaveLicenseWooCatalogo' ) );
@@ -70,12 +71,16 @@ class cWooCatalogo {
 		
 		
 
-
 	}
 
 
-	//Cargar Resources Vendor
-	public static function load_resources() {
+	//Cargar Resources Vendor — only on plugin pages
+	public static function load_resources( $hook ) {
+
+		// Only load on plugin admin pages
+		if ( strpos($hook, 'woocatalogo') === false ) {
+			return;
+		}
 
 		//Cargar Resources Vendor
 	    wp_enqueue_script('jquery.dataTables.min',		WOOCATALOGO__PLUGIN_URL . 'admin/vendor/datatables/jquery.dataTables.min.js', array('jquery'), '1.11.3');
@@ -106,7 +111,7 @@ class cWooCatalogo {
 		wp_localize_script('admin-woocatalogo','Global',
 			array(
 			    'url'    => admin_url( 'admin-ajax.php' ),
-			    'nonce'  => wp_create_nonce( 'segu' )
+			    'nonce'  => wp_create_nonce( 'woocatalogo_admin' )
 			)
 		);
 
@@ -141,6 +146,5 @@ class cWooCatalogo {
     }
 	
 	
-
 
 }

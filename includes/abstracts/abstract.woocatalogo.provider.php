@@ -35,7 +35,7 @@ abstract class WooCatalogoProviderAbstract implements WooCatalogoProviderInterfa
 
     /* Helper function to standardize log messages */
     protected function log($message) {
-        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+        if (defined('WOOCATALOGO_DEBUG_MODE') && WOOCATALOGO_DEBUG_MODE) {
             error_log("[WooCatalogo - {$this->slug}] " . print_r($message, true));
         }
     }
@@ -46,7 +46,7 @@ abstract class WooCatalogoProviderAbstract implements WooCatalogoProviderInterfa
             'method'    => $method,
             'headers'   => $headers,
             'timeout'   => 45,
-            'sslverify' => false, // Consider enabling for production if certs are valid
+            'sslverify' => true,
         ];
 
         if (!empty($body)) {
