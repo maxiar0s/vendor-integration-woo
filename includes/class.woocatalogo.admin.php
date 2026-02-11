@@ -210,26 +210,27 @@ class cWooCatalogoAdmin {
         </div>
         
         <!--Configuración Global-->
-        <div id="popup" style="display: none;">
-            <div class="content-popup">
+        <div id="popup" class="cd-popup" role="alert">
+            <div class="cd-popup-container">
             <div class="close" id="fCloseConfogModalWooCatalogo">
                 <a href="#" id="close"><img src="<?php echo plugins_url('../admin/img/closewoocatalogo.png',__FILE__)?>"/></a>
             </div>
                 <div>
                     <h2>Configuración Global</h2>
-                    <div class="save-woocatalogo">
-                        <form class="saveconfig" id="fSaveConfigGlobWooCatalogo" method="post">
+                    <div class="viw-modal-grid">
+                        <div class="viw-modal-column-left">
+                            <form class="saveconfig" id="fSaveConfigGlobWooCatalogo" method="post">
 
-                            <label for="ganancia-woocatalogo">Ganacia</label><br>
-                            <input type="number" id="gan-woocatalogo" name="ganancia-woocatalogo" step="0.0001" value="<?php echo esc_attr($ganancia); ?>"><br>
+                                <label for="ganancia-woocatalogo">Ganacia</label><br>
+                                <input type="number" id="gan-woocatalogo" name="ganancia-woocatalogo" step="0.0001" value="<?php echo esc_attr($ganancia); ?>"><br>
 
-                            <label for="comision-woocatalogo">Comisión</label><br>
-                            <input type="number" id="comision-woocatalogo" name="comision-woocatalogo" step="0.0001" value="<?php echo esc_attr($comision); ?>"><br>
+                                <label for="comision-woocatalogo">Comisión</label><br>
+                                <input type="number" id="comision-woocatalogo" name="comision-woocatalogo" step="0.0001" value="<?php echo esc_attr($comision); ?>"><br>
 
-                            <label for="dolar-woocatalogo">Dolar</label><br>
-                            <input type="number" id="dolar-woocatalogo" name="dolar-woocatalogo" step="0.0001" value="<?php echo esc_attr($dolar); ?>"><br>
+                                <label for="dolar-woocatalogo">Dolar</label><br>
+                                <input type="number" id="dolar-woocatalogo" name="dolar-woocatalogo" step="0.0001" value="<?php echo esc_attr($dolar); ?>"><br>
 
-                            <label for="categories-woocatalogo">Etiquetas</label><br>
+                                <label for="categories-woocatalogo">Etiquetas</label><br>
                                 <select name="categories-woocatalogo" id="categories-woocatalogo" style="width:100%">
                                 <?php
                                     $all_tags = get_terms ('product_tag');
@@ -244,48 +245,51 @@ class cWooCatalogoAdmin {
                                 ?>
                                 </select><br>
                             
-                            <input type="submit" name="submit" class="button button-primary" id="fSaveConfigWooCatalogo" value="<?php  _e('Guardar o Actualizar', 'vendor-integration-woo')?>">
+                                <input type="submit" name="submit" class="button button-primary" id="fSaveConfigWooCatalogo" value="<?php  _e('Guardar o Actualizar', 'vendor-integration-woo')?>">
 
-                        </form>
-                        <p style="text-align:center">
-                            <label><strong>Formula</strong></label><br>
-                            <code> (PRECIO TECNOGLOBAL * DOLAR) * GANANCIA * COMISION</code>
-                        </p>
-                        <p style="text-align:center">
-                            <label><strong>Etiquetas Guardadas</strong></label><br>
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Dolar</th>
-                                        <th>Ganancia</th>
-                                        <th>Comision</th>
-                                        <th>Etiquetas</th>
-                                        <th>Fecha</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <?php
-                                
-                                $aOptionsWooCatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+                            </form>
+                        </div>
+                        <div class="viw-modal-column-right">
+                            <div class="viw-formula-box">
+                                <label><strong>Formula</strong></label><br>
+                                <code> (PRECIO TECNOGLOBAL * DOLAR) * GANANCIA * COMISION</code>
+                            </div>
+                            <div class="viw-tags-history">
+                                <label><strong>Etiquetas Guardadas</strong></label><br>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Dolar</th>
+                                            <th>Ganancia</th>
+                                            <th>Comision</th>
+                                            <th>Etiquetas</th>
+                                            <th>Fecha</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <?php
+                                    
+                                    $aOptionsWooCatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
 
-                                foreach ($aOptionsWooCatalogo as $option_woocatalogo) {
+                                    foreach ($aOptionsWooCatalogo as $option_woocatalogo) {
 
-                                    echo "<tr>";
-                                        echo "<td>".esc_html($option_woocatalogo["id"])."</td>";
-                                        echo "<td>".esc_html($option_woocatalogo["dolar"])."</td>";
-                                        echo "<td>".esc_html($option_woocatalogo["fmult"])."</td>";
-                                        echo "<td>".esc_html($option_woocatalogo["comision"])."</td>";
-                                        echo "<td>".esc_html($option_woocatalogo["etiquetas_precio"])."</td>";
-                                        echo "<td>".esc_html($option_woocatalogo["reg_date"])."</td>";
-                                        echo "<td style='text-align: center;'><button type='button' aria-label='Eliminar Etiqueta' data-tooltip='Eliminar Etiqueta' onclick='fDeleteConfigWooCatalogo(".intval($option_woocatalogo["id"]).")'><span class='dashicons dashicons-remove'></span></button></td>";
-                                    echo "</tr>";
+                                        echo "<tr>";
+                                            echo "<td>".esc_html($option_woocatalogo["id"])."</td>";
+                                            echo "<td>".esc_html($option_woocatalogo["dolar"])."</td>";
+                                            echo "<td>".esc_html($option_woocatalogo["fmult"])."</td>";
+                                            echo "<td>".esc_html($option_woocatalogo["comision"])."</td>";
+                                            echo "<td>".esc_html($option_woocatalogo["etiquetas_precio"])."</td>";
+                                            echo "<td>".esc_html($option_woocatalogo["reg_date"])."</td>";
+                                            echo "<td style='text-align: center;'><button type='button' aria-label='Eliminar Etiqueta' data-tooltip='Eliminar Etiqueta' onclick='fDeleteConfigWooCatalogo(".intval($option_woocatalogo["id"]).")'><span class='dashicons dashicons-remove'></span></button></td>";
+                                        echo "</tr>";
 
-                                }
-                                
-                                ?>
-                            </table>
-                        </p>
+                                    }
+                                    
+                                    ?>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

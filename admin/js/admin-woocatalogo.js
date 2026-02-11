@@ -230,13 +230,14 @@ jQuery(document).ready(function () {
     });
   });
 
-  jQuery("#fOpenConfogModalWooCatalogo").click(function () {
-    jQuery("#popup, .popup-overlay").fadeIn("slow");
-    jQuery(".popup-overlay").height(jQuery(window).height());
+  jQuery("#fOpenConfogModalWooCatalogo").click(function (e) {
+    e.preventDefault();
+    jQuery("#popup").addClass("is-visible");
   });
 
-  jQuery("#fCloseConfogModalWooCatalogo").click(function () {
-    jQuery("#popup, .popup-overlay").fadeOut("slow");
+  jQuery("#fCloseConfogModalWooCatalogo").click(function (e) {
+    e.preventDefault();
+    jQuery("#popup").removeClass("is-visible");
   });
 
   //popup de previsualizacion de producto//
@@ -254,7 +255,7 @@ jQuery(document).ready(function () {
   jQuery(document).keyup(function (event) {
     if (event.which == "27") {
       jQuery(".cd-popup").removeClass("is-visible");
-      jQuery("#popup, .popup-overlay").fadeOut("slow");
+      jQuery("#popup").removeClass("is-visible");
     }
   });
 });

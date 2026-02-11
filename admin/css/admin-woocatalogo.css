@@ -257,7 +257,7 @@
 .cd-popup-container {
   background: var(--viw-surface);
   width: 90%;
-  max-width: 500px;
+  max-width: 900px;
   border-radius: var(--viw-radius);
   padding: 40px;
   box-shadow: var(--viw-shadow-lg);
@@ -265,6 +265,53 @@
   transition: transform 0.3s;
   position: relative;
   text-align: left;
+}
+
+.viw-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.viw-modal-column-right {
+  border-left: 1px solid var(--viw-border);
+  padding-left: 32px;
+}
+
+.viw-formula-box {
+  background: var(--viw-bg);
+  padding: 16px;
+  border-radius: var(--viw-radius-sm);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.viw-formula-box code {
+  display: block;
+  margin-top: 8px;
+  background: white;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--viw-border);
+}
+
+.viw-tags-history table {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .viw-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .viw-modal-column-right {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--viw-border);
+    padding-top: 24px;
+  }
 }
 
 .cd-popup.is-visible .cd-popup-container {
