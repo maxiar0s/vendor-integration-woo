@@ -74,17 +74,17 @@ class cCatalogWooCatalog {
                     'actualizado'   => $producto->updated_at,
                     'acciones'      => "
 
-                        <button type=\"button\" onclick=\"fPriceShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-money-alt\"></span></button>
+                        <button type=\"button\" title=\"Ver Precio\" onclick=\"fPriceShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-money-alt\"></span></button>
                         
-                        <button type=\"button\" onclick=\"fStockShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-products\"></span></button>
+                        <button type=\"button\" title=\"Ver Stock\" onclick=\"fStockShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-products\"></span></button>
 
-                        <button type=\"button\" onclick=\"fInsertProductWooCatalogo('{$producto->part_number}','{$producto->proveedor}' )\"><span class=\"dashicons dashicons-insert\"></span></button>
+                        <button type=\"button\" title=\"Insertar Producto\" onclick=\"fInsertProductWooCatalogo('{$producto->part_number}','{$producto->proveedor}' )\"><span class=\"dashicons dashicons-insert\"></span></button>
 
-                        <button type=\"button\" onclick=\"fDeleteProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-remove\"></span></button>
+                        <button type=\"button\" title=\"Eliminar Producto\" onclick=\"fDeleteProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-remove\"></span></button>
 
-                        <button type=\"button\" onclick=\"fUpdateAtrrWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-database-add\"></span></button>
+                        <button type=\"button\" title=\"Actualizar Ficha Técnica\" onclick=\"fUpdateAtrrWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-database-add\"></span></button>
 
-                        <button type=\"button\" onclick=\"fPreviewProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-share-alt2\"></span></button>
+                        <button type=\"button\" title=\"Vista Previa\" onclick=\"fPreviewProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-share-alt2\"></span></button>
 
                     "
 

@@ -208,17 +208,20 @@ class cProductWooCatalogo {
         $proveedor   =  sanitize_text_field( $_POST['proveedor'] );
 
         $oCreateProductWooCatalogo = (new cWooCatalogoApiRequest())->fGetCatalogExtendWooCatalogo($part_number);
+        
+        $msg = ""; // Initialize message
+
         // Verificamos si existe la clave 'data' en el objeto
         if (isset($oCreateProductWooCatalogo->data) && is_array($oCreateProductWooCatalogo->data)) {
             // Recorremos el array de productos dentro de 'data'
             foreach ($oCreateProductWooCatalogo->data as $producto) {
-                $existingProductId = wc_get_product_id_by_sku($producto->part_number);
-
+                // Only process the requested provider
                 if ($producto->proveedor == $proveedor) {
+                    $existingProductId = wc_get_product_id_by_sku($producto->part_number);
 
                     if ($existingProductId > 0) {
-                        echo "Este producto ya está publicado en su tienda";
-                        continue;
+                        $msg = "Este producto ya está publicado en su tienda";
+                        // continue; // Removing continue to ensure we reach the echo
                     } else {
                         $product = new WC_Product_Simple();
                         $precio_inflado = is_numeric($producto->precio) ? ceil($producto->precio * 99000000) : 99999999;
@@ -380,14 +383,16 @@ class cProductWooCatalogo {
                         }
 
 
-                        echo "Producto creado";
+                        $msg = "Producto creado";
                     }//IF del si el producto no existe
                 }
             }
 
         } else {
-            echo "No se encontraron datos de productos.";
+            $msg = "No se encontraron datos de productos.";
         }
+        
+        echo $msg;
         wp_die();
     }
 

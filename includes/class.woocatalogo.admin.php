@@ -64,13 +64,14 @@ class cWooCatalogoAdmin {
         }
 
         ?>
+        <div class="viw-root">
         <div class="wrap">
             <h1><?php echo get_admin_page_title();  ?></h1>
         </div>
     
         <div class="card">
             <div class="logo-contend">
-                <img src="<?php echo plugins_url('../admin/img/logowoocatalogo.png',__FILE__)?>" width="255">
+                <img src="<?php echo plugins_url('../admin/img/logowoocatalogo.png',__FILE__)?>">
             </div>
             <div class="gracias">
                 <h3 class="title">Vendor Integration Woo</h3>
@@ -124,6 +125,7 @@ class cWooCatalogoAdmin {
             </form>
             </div>
         </div>
+        </div>
         <?php
     }
 
@@ -143,6 +145,7 @@ class cWooCatalogoAdmin {
             $ganancia = "";
         }
         ?>
+        <div class="viw-root">
         <div class="wrap">
             <h1><?php echo get_admin_page_title();  ?></h1>
         </div>
@@ -250,7 +253,7 @@ class cWooCatalogoAdmin {
                         </p>
                         <p style="text-align:center">
                             <label><strong>Etiquetas Guardadas</strong></label><br>
-                            <table class="table table-striped" border="1">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -297,6 +300,7 @@ class cWooCatalogoAdmin {
                 <a href="#0" class="cd-popup-close"></a>
             </div> <!-- cd-popup-container -->
         </div> <!-- cd-popup -->
+        </div>
         <?php
     }
     public static function fSubmenuFicha() {
@@ -305,6 +309,7 @@ class cWooCatalogoAdmin {
         }
 
         ?>
+        <div class="viw-root">
         <div class="wrap">
             <h1><?php echo get_admin_page_title();  ?></h1>
         </div>
@@ -374,6 +379,7 @@ class cWooCatalogoAdmin {
         </table>
     </div>
 
+    </div>
     <?php
     }
     public static function fSubmenuProduct() {
@@ -382,6 +388,7 @@ class cWooCatalogoAdmin {
         }
 
         ?>
+        <div class="viw-root">
         <div class="wrap">
             <h1>Sincroniza stock y precio con los(el) proveedor(es)</h1>
             <div class="gnu-sincronizar">
@@ -397,6 +404,7 @@ class cWooCatalogoAdmin {
                 <p id="estado-progreso" style="font-size: larger;">0 productos actualizados -  0 productos encontrados</p> 
                 
             </div>
+        </div>
         </div>
         <?php
 
