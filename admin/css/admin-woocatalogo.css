@@ -182,7 +182,7 @@
   width: 100% !important;
   border: 1px solid var(--viw-border);
   border-radius: var(--viw-radius);
-  overflow: hidden;
+  border-radius: var(--viw-radius);
 }
 
 .viw-root table.dataTable thead th {
@@ -340,4 +340,56 @@
   color: var(--viw-text-main);
   text-align: center;
   margin-top: 12px;
+}
+
+/* Custom Tooltip Styles */
+.viw-root [data-tooltip] {
+  position: relative;
+}
+
+.viw-root [data-tooltip]::before,
+.viw-root [data-tooltip]::after {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease,
+    transform 0.2s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.viw-root [data-tooltip]::before {
+  content: "";
+  bottom: 100%;
+  margin-bottom: 5px;
+  border: 6px solid transparent;
+  border-top-color: var(--viw-text-main);
+  transform: translateX(-50%) translateY(5px);
+}
+
+.viw-root [data-tooltip]::after {
+  content: attr(data-tooltip);
+  bottom: 100%;
+  margin-bottom: 12px;
+  background: var(--viw-text-main);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateX(-50%) translateY(5px);
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.viw-root [data-tooltip]:hover::before,
+.viw-root [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }

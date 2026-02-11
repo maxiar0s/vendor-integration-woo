@@ -74,17 +74,17 @@ class cCatalogWooCatalog {
                     'actualizado'   => $producto->updated_at,
                     'acciones'      => "
 
-                        <button type=\"button\" title=\"Ver Precio\" onclick=\"fPriceShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-money-alt\"></span></button>
+                        <button type=\"button\" aria-label=\"Ver Precio\" data-tooltip=\"Ver Precio\" onclick=\"fPriceShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-money-alt\"></span></button>
                         
-                        <button type=\"button\" title=\"Ver Stock\" onclick=\"fStockShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-products\"></span></button>
+                        <button type=\"button\" aria-label=\"Ver Stock\" data-tooltip=\"Ver Stock\" onclick=\"fStockShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-products\"></span></button>
 
-                        <button type=\"button\" title=\"Insertar Producto\" onclick=\"fInsertProductWooCatalogo('{$producto->part_number}','{$producto->proveedor}' )\"><span class=\"dashicons dashicons-insert\"></span></button>
+                        <button type=\"button\" aria-label=\"Insertar Producto\" data-tooltip=\"Insertar Producto\" onclick=\"fInsertProductWooCatalogo('{$producto->part_number}','{$producto->proveedor}' )\"><span class=\"dashicons dashicons-insert\"></span></button>
 
-                        <button type=\"button\" title=\"Eliminar Producto\" onclick=\"fDeleteProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-remove\"></span></button>
+                        <button type=\"button\" aria-label=\"Eliminar Producto\" data-tooltip=\"Eliminar Producto\" onclick=\"fDeleteProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-remove\"></span></button>
 
-                        <button type=\"button\" title=\"Actualizar Ficha Técnica\" onclick=\"fUpdateAtrrWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-database-add\"></span></button>
+                        <button type=\"button\" aria-label=\"Actualizar Ficha Técnica\" data-tooltip=\"Actualizar Ficha Técnica\" onclick=\"fUpdateAtrrWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-database-add\"></span></button>
 
-                        <button type=\"button\" title=\"Vista Previa\" onclick=\"fPreviewProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-share-alt2\"></span></button>
+                        <button type=\"button\" aria-label=\"Vista Previa\" data-tooltip=\"Vista Previa\" onclick=\"fPreviewProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-share-alt2\"></span></button>
 
                     "
 

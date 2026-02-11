@@ -153,16 +153,18 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
         
         $searchKey = !empty($sku) ? $sku : $part_number;
 
-        $url = add_query_arg('sku', $searchKey, $this->getBaseUrl() . 'product'); // Assuming 'product' endpoint per previous findings
+        // Changing endpoint from 'product' to 'products' to get full object details
+        $url = add_query_arg('sku', $searchKey, $this->getBaseUrl() . 'products'); 
         $headers = ['Authorization' => 'Bearer ' . $token];
 
         $response = $this->remoteRequest($url, 'GET', $headers);
 
         if ($response) {
-            // Nexsys returns object for single product? Or array?
-            // Postman usually implies API returns object for singular endpoint.
+            // Check for 'data' wrapper as seen in getCatalog
+            $data = isset($response['data']) ? $response['data'] : $response;
+
             // If array check first item.
-            $item = is_array($response) && isset($response[0]) ? $response[0] : $response;
+            $item = is_array($data) && isset($data[0]) ? $data[0] : $data;
 
             return [
                 'price' => isset($item['price']) ? $item['price'] : 0,
@@ -177,7 +179,8 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
         $token = $this->getToken();
         if (!$token) return false;
         
-        $url = add_query_arg('sku', $part_number, $this->getBaseUrl() . 'product');
+        // Changing endpoint from 'product' to 'products' to get full object details
+        $url = add_query_arg('sku', $part_number, $this->getBaseUrl() . 'products');
         $headers = ['Authorization' => 'Bearer ' . $token];
         
         return $this->remoteRequest($url, 'GET', $headers);

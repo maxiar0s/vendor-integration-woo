@@ -76,107 +76,12 @@ class cProductWooCatalogo {
                     // Si existe en icecat
                     if (!empty($producto->caracteristicas)) {
                         echo "Con Atributos - ";
-                        $product->set_short_description($producto->descripcion);
-                        $product->set_description($producto->htmlContent);
-            
-                        // Obtener las propiedades de empaquetado
-                        $width = 0;
-                        $length = 0;
-                        $height = 0;
-                        $weight = 0;
-                        foreach ($producto->caracteristicas as $caracteristica) {
-                            // Recorrer las propiedades de la característica
-                            foreach ($caracteristica->propiedades as $grupo_propiedades) {
-                                // Verificar si el grupo es "Empaquetado"
-                                if ($grupo_propiedades->grupo == 'Empaquetado' || $grupo_propiedades->grupo == 'Peso y dimensiones') {
-                                    foreach ($grupo_propiedades->caracteristicas_grupo as $empaquetado) {
-                                        // Obtener el nombre de la característica y su presentación
-                                        $nombre_caracteristica = $empaquetado->nombre;
-                                        $presentacion = $empaquetado->presentacion;
-                        
-                                        // Verificar si el nombre de la característica es uno de los nombres alternativos
-                                        if (in_array($nombre_caracteristica, array('Ancho del paquete', 'Ancho'))) {
-                                            $width = cProductWooCatalogo::convertToCm($presentacion);
-                                        } elseif (in_array($nombre_caracteristica, array('Profundidad del paquete', 'Profundidad'))) {
-                                            $length = cProductWooCatalogo::convertToCm($presentacion);
-                                        } elseif (in_array($nombre_caracteristica, array('Altura del paquete', 'Altura'))) {
-                                            $height = cProductWooCatalogo::convertToCm($presentacion);
-                                        } elseif (in_array($nombre_caracteristica, array('Peso del paquete', 'Peso'))) {
-                                            $weight = cProductWooCatalogo::convertToKg($presentacion);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Asignar los valores al objeto $product según corresponda
-                        $product->set_weight($weight);
-                        $product->set_height($height);
-                        $product->set_width($width);
-                        $product->set_length($length);
-    
-                        //asignar los atributos
-                        $attributes = array();
-                        $atributos = array(
-                            array(
-                                'name' => 'Marca',
-                                'options' => array($producto->marca),
-                                'position' => 1,
-                                'visible' => true,
-                                'variation' => true
-                            )
-    
-                        );
-                        foreach ($atributos as $atributo) {
-                            $attribute = new WC_Product_Attribute();
-                            $attribute->set_name($atributo['name']);
-                            $attribute->set_options($atributo['options']);
-                            $attribute->set_position($atributo['position']);
-                            $attribute->set_visible($atributo['visible']);
-                            $attribute->set_variation($atributo['variation']);
-                            $attributes[] = $attribute;
-                        }
-    
-                        $product->set_attributes($attributes);
-                        $product->save();
-
-
-                        foreach ($producto->caracteristicas as $caracteristica) {
-                            $aImagenesData = $caracteristica->imagenes;
-                            $aGalleryData = $caracteristica->galeria;
-                        }
-    
-                        cProductWooCatalogo::asignarImagenesProducto($existingProductId, $aImagenesData, $aGalleryData);
-                    }else{
-
+                    } else {
                         echo "Sin Atributos - ";
-                        $product->set_short_description($producto->descripcion);
-                        $product->set_description($producto->descripcion);
-                        //asignar los atributos
-                        $attributes = array();
-                        $atributos = array(
-                            array(
-                                'name' => 'Marca',
-                                'options' => array($producto->marca),
-                                'position' => 1,
-                                'visible' => true,
-                                'variation' => true
-                            )
-    
-                        );
-                        foreach ($atributos as $atributo) {
-                            $attribute = new WC_Product_Attribute();
-                            $attribute->set_name($atributo['name']);
-                            $attribute->set_options($atributo['options']);
-                            $attribute->set_position($atributo['position']);
-                            $attribute->set_visible($atributo['visible']);
-                            $attribute->set_variation($atributo['variation']);
-                            $attributes[] = $attribute;
-                        }
-    
-                        $product->set_attributes($attributes);
-                        $product->save();
                     }
+
+                    // Common update logic using the helper method
+                    self::updateContentAndAttributes($product, $producto);
                     echo "Producto Actualizado";
                     
                 } else {
@@ -209,191 +114,185 @@ class cProductWooCatalogo {
 
         $oCreateProductWooCatalogo = (new cWooCatalogoApiRequest())->fGetCatalogExtendWooCatalogo($part_number);
         
-        $msg = ""; // Initialize message
+        $msg = ""; 
 
         // Verificamos si existe la clave 'data' en el objeto
         if (isset($oCreateProductWooCatalogo->data) && is_array($oCreateProductWooCatalogo->data)) {
+            $found_provider = false;
+            $items_count = count($oCreateProductWooCatalogo->data);
+            error_log("Debug WooCatalogo: API returned {$items_count} items for PartNumber: {$part_number}");
+
             // Recorremos el array de productos dentro de 'data'
-            foreach ($oCreateProductWooCatalogo->data as $producto) {
+            foreach ($oCreateProductWooCatalogo->data as $index => $producto) {
+                
+                $prod_pn = isset($producto->part_number) ? $producto->part_number : 'N/A';
+                $prod_prov = isset($producto->proveedor) ? $producto->proveedor : 'N/A';
+                
+                error_log("Debug WooCatalogo Item [{$index}]: SKU: {$prod_pn} | Provider (API): '{$prod_prov}' vs Requested: '{$proveedor}'");
+                
+                // Inspect the structure of the first item to debug missing properties
+                if ($index === 0) {
+                     error_log("Debug WooCatalogo Item [0] Full Structure: " . print_r($producto, true));
+                }
+
+                // Check for missing or empty required fields
+                if (empty($producto->part_number) || empty($producto->proveedor)) {
+                    error_log("Debug WooCatalogo: Skipping item [{$index}] due to empty part_number or proveedor");
+                    continue;
+                }
+
                 // Only process the requested provider
-                if ($producto->proveedor == $proveedor) {
+                // Using loose comparison after trim to handle potential invisible characters or type mismatches
+                if (strcasecmp(trim($producto->proveedor), trim($proveedor)) === 0) {
+                    $found_provider = true;
+                    error_log("Debug WooCatalogo: Match found for provider '{$proveedor}'");
+                    
                     $existingProductId = wc_get_product_id_by_sku($producto->part_number);
 
                     if ($existingProductId > 0) {
                         $msg = "Este producto ya está publicado en su tienda";
-                        // continue; // Removing continue to ensure we reach the echo
+                        error_log("Debug WooCatalogo: Product already exists (ID: {$existingProductId})");
                     } else {
-                        $product = new WC_Product_Simple();
-                        $precio_inflado = is_numeric($producto->precio) ? ceil($producto->precio * 99000000) : 99999999;
-
+                        error_log("Debug WooCatalogo: Attempting to create product...");
                         
+                        $product = new WC_Product_Simple();
                         // Info Basica del producto 
-                        $product->set_name($producto->nombre_producto);
+                        $product->set_name(isset($producto->nombre_producto) ? $producto->nombre_producto : 'Sin Nombre');
                         $product->set_sku($producto->part_number);
+
+                        $price = isset($producto->precio) && is_numeric($producto->precio) ? $producto->precio : 0;
+                        $precio_inflado = ceil($price * 99000000); 
+                        if ($price == 0) { $precio_inflado = 99999999; }
+
                         $product->set_regular_price($precio_inflado);
                         $product->set_manage_stock(true);
-
                         $product->set_stock_status('instock');
                         $product->set_stock_quantity(1);
                         
-                        // Si existe en icecat
+                        $product->save(); // Save first to get ID
                         
-                        if (!empty($producto->caracteristicas)) {
-                            $product->set_short_description($producto->descripcion);
-                            $product->set_description($producto->htmlContent);
-                
-                            // Obtener las propiedades de empaquetado
-                            $width = 0;
-                            $length = 0;
-                            $height = 0;
-                            $weight = 0;
-                            
-                            foreach ($producto->caracteristicas as $caracteristica) {
-                                // Recorrer las propiedades de la característica
-                                foreach ($caracteristica->propiedades as $grupo_propiedades) {
-                                    // Verificar si el grupo es "Empaquetado"
-                                    if ($grupo_propiedades->grupo == 'Empaquetado' || $grupo_propiedades->grupo == 'Peso y dimensiones') {
-                                        foreach ($grupo_propiedades->caracteristicas_grupo as $empaquetado) {
-            
-                                            switch ($empaquetado->nombre) { 
-                                                case 'Ancho del paquete':
-                                                    $width = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
-                                                    break;
-                                                case 'Profundidad del paquete':
-                                                    $length = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
-                                                    break;
-                                                case 'Altura del paquete':
-                                                    $height = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
-                                                    break;
-                                                case 'Peso del paquete':
-                                                    $weight = cProductWooCatalogo::convertToKg($empaquetado->presentacion);
-                                                    break;
-                                                default:
-                                                    // No hacer nada si la propiedad no es relevante
-                                                    break;
-                                            }
-                                        }
-                                        
-                                    }
-                                }
-                            }
-                            
-                            // Asignar los valores al objeto $product según corresponda
-                            $product->set_weight($weight);
-                            $product->set_height($height);
-                            $product->set_width($width);
-                            $product->set_length($length);
-                            
-                            //asignar los atributos
-                            $attributes = array();
-                            $atributos = array(
-                                array(
-                                    'name' => 'Marca',
-                                    'options' => array($producto->marca),
-                                    'position' => 1,
-                                    'visible' => true,
-                                    'variation' => true
-                                )
-        
-                            );
-                            foreach ($atributos as $atributo) {
-                                $attribute = new WC_Product_Attribute();
-                                $attribute->set_name($atributo['name']);
-                                $attribute->set_options($atributo['options']);
-                                $attribute->set_position($atributo['position']);
-                                $attribute->set_visible($atributo['visible']);
-                                $attribute->set_variation($atributo['variation']);
-                                $attributes[] = $attribute;
-                            }
-        
-                            $product->set_attributes($attributes);
-                            
-                            $product->save();
-
-                            //guardar proveedor y sku de proveedor
-                            update_post_meta($product->get_id(), '_proveedor', $producto->proveedor);
-                            update_post_meta($product->get_id(), '_sku_proveedor', $producto->sku);
-
-                            //luego de publicado asigno la categoria
-                            wp_set_object_terms($product->get_id(), 'Bodega Externa', 'product_cat',true);
-                            wp_set_object_terms($product->get_id(), 'Bodega Externa', 'product_tag',true);
-        
-                            //quito la categoria Sin categorizar
-                            // Obtener el término (categoría) por su nombre uncategorized Sin categorizar
-                            $id_category_sin = get_term_by('name', 'Sin categorizar', 'product_cat');
-                            $id_category_un = get_term_by('name', 'Uncategorized', 'product_cat');
-                            // Desasignar la categoría del producto
-                            $idcategory_sin = $id_category_sin->term_id;
-                            $idcategory_un = $id_category_un->term_id;
-                            $product_new_id = $product->get_id();
-                            wp_remove_object_terms($product_new_id, $idcategory_sin, 'product_cat');
-                            wp_remove_object_terms($product_new_id, $idcategory_un, 'product_cat');
-                            foreach ($producto->caracteristicas as $caracteristica) {
-                                $aImagenesData = $caracteristica->imagenes;
-                                $aGalleryData = $caracteristica->galeria;
-                            }
-        
-                            cProductWooCatalogo::asignarImagenesProducto($product_new_id, $aImagenesData, $aGalleryData);
-                        }else{
-
-                            $product->set_short_description($producto->descripcion);
-                            $product->set_description($producto->descripcion);
-                            //asignar los atributos
-                            $attributes = array();
-                            $atributos = array(
-                                array(
-                                    'name' => 'Marca',
-                                    'options' => array($producto->marca),
-                                    'position' => 1,
-                                    'visible' => true,
-                                    'variation' => true
-                                )
-        
-                            );
-                            foreach ($atributos as $atributo) {
-                                $attribute = new WC_Product_Attribute();
-                                $attribute->set_name($atributo['name']);
-                                $attribute->set_options($atributo['options']);
-                                $attribute->set_position($atributo['position']);
-                                $attribute->set_visible($atributo['visible']);
-                                $attribute->set_variation($atributo['variation']);
-                                $attributes[] = $attribute;
-                            }
-        
-                            $product->set_attributes($attributes);
-                            $product->save();
-                            //guardar proveedor y sku de proveedor
-                            update_post_meta($product->get_id(), '_proveedor', $producto->proveedor);
-                            update_post_meta($product->get_id(), '_sku_proveedor', $producto->sku);
-                            
-                            //luego de publicado asigno la categoria
-                            wp_set_object_terms($product->get_id(), 'Bodega Externa', 'product_cat',true);
-                            wp_set_object_terms($product->get_id(), 'Bodega Externa', 'product_tag',true);
-        
-                            //quito la categoria Sin categorizar
-                            // Obtener el término (categoría) por su nombre uncategorized Sin categorizar
-                            $id_category_sin = get_term_by('name', 'Sin categorizar', 'product_cat');
-                            $id_category_un = get_term_by('name', 'Uncategorized', 'product_cat');
-                            // Desasignar la categoría del producto
-                            $idcategory_sin = $id_category_sin->term_id;
-                            $idcategory_un = $id_category_un->term_id;
-                            $product_new_id = $product->get_id();
-                            wp_remove_object_terms($product_new_id, $idcategory_sin, 'product_cat');
-                            wp_remove_object_terms($product_new_id, $idcategory_un, 'product_cat');
-                        }
-
-
-                        $msg = "Producto creado";
-                    }//IF del si el producto no existe
+                        // Common update logic
+                        self::updateContentAndAttributes($product, $producto);
+                        
+                        $msg = "Producto creado correctamente";
+                        error_log("Debug WooCatalogo: Product created successfully (ID: " . $product->get_id() . ")");
+                    }
+                    break; // Stop loop after finding the match
                 }
+            }
+            
+            if (!$found_provider && empty($msg)) {
+                $msg = "No se encontró el producto para el proveedor especificado: " . $proveedor;
+                error_log("Debug WooCatalogo: No match found for provider '{$proveedor}' in API response.");
             }
 
         } else {
-            $msg = "No se encontraron datos de productos.";
+            $msg = "No se encontraron datos de productos en la API (data empty). Part Number: " . $part_number;
+            error_log("Debug WooCatalogo: API returned no data for PartNumber: {$part_number}");
         }
         
         echo $msg;
         wp_die();
+    }
+
+    /**
+     * Helper method to update product content, attributes, meta, and images from API data.
+     */
+    private static function updateContentAndAttributes($product, $producto) {
+        // Description and Dimensions
+        if (!empty($producto->caracteristicas)) {
+            $product->set_short_description($producto->descripcion);
+            $product->set_description($producto->htmlContent);
+
+            // Parsing Dimensions
+            $width = 0; $length = 0; $height = 0; $weight = 0;
+            foreach ($producto->caracteristicas as $caracteristica) {
+                foreach ($caracteristica->propiedades as $grupo_propiedades) {
+                    if ($grupo_propiedades->grupo == 'Empaquetado' || $grupo_propiedades->grupo == 'Peso y dimensiones') {
+                        foreach ($grupo_propiedades->caracteristicas_grupo as $empaquetado) {
+                            switch ($empaquetado->nombre) { 
+                                case 'Ancho del paquete':
+                                case 'Ancho':
+                                    $width = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
+                                    break;
+                                case 'Profundidad del paquete':
+                                case 'Profundidad':
+                                    $length = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
+                                    break;
+                                case 'Altura del paquete':
+                                case 'Altura':
+                                    $height = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
+                                    break;
+                                case 'Peso del paquete':
+                                case 'Peso':
+                                    $weight = cProductWooCatalogo::convertToKg($empaquetado->presentacion);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            $product->set_weight($weight);
+            $product->set_height($height);
+            $product->set_width($width);
+            $product->set_length($length);
+        } else {
+            $product->set_short_description($producto->descripcion);
+            $product->set_description($producto->descripcion);
+        }
+
+        // Attributes (Marca)
+        $attributes = array();
+        $atributos = array(
+            array(
+                'name' => 'Marca',
+                'options' => array($producto->marca),
+                'position' => 1,
+                'visible' => true,
+                'variation' => true
+            )
+        );
+        foreach ($atributos as $atributo) {
+            $attribute = new WC_Product_Attribute();
+            $attribute->set_name($atributo['name']);
+            $attribute->set_options($atributo['options']);
+            $attribute->set_position($atributo['position']);
+            $attribute->set_visible($atributo['visible']);
+            $attribute->set_variation($atributo['variation']);
+            $attributes[] = $attribute;
+        }
+        $product->set_attributes($attributes);
+        $product->save();
+
+        // Meta Data
+        update_post_meta($product->get_id(), '_proveedor', $producto->proveedor);
+        update_post_meta($product->get_id(), '_sku_proveedor', $producto->sku);
+
+        // Terms
+        wp_set_object_terms($product->get_id(), 'Bodega Externa', 'product_cat', true);
+        wp_set_object_terms($product->get_id(), 'Bodega Externa', 'product_tag', true);
+
+        // Remove Uncategorized
+        $id_category_sin = get_term_by('name', 'Sin categorizar', 'product_cat');
+        $id_category_un = get_term_by('name', 'Uncategorized', 'product_cat');
+        $idcategory_sin = isset($id_category_sin->term_id) ? $id_category_sin->term_id : 0;
+        $idcategory_un = isset($id_category_un->term_id) ? $id_category_un->term_id : 0;
+        
+        if($idcategory_sin) wp_remove_object_terms($product->get_id(), $idcategory_sin, 'product_cat');
+        if($idcategory_un) wp_remove_object_terms($product->get_id(), $idcategory_un, 'product_cat');
+
+        // Images
+        if (!empty($producto->caracteristicas)) {
+            $aImagenesData = null;
+            $aGalleryData = null;
+            foreach ($producto->caracteristicas as $caracteristica) {
+                $aImagenesData = $caracteristica->imagenes;
+                $aGalleryData = $caracteristica->galeria;
+            }
+            if ($aImagenesData && $aGalleryData) {
+                cProductWooCatalogo::asignarImagenesProducto($product->get_id(), $aImagenesData, $aGalleryData);
+            }
+        }
     }
 
     public static function asignarImagenesProducto($product_new_id, $aImagenesData, $aGalleryData) {

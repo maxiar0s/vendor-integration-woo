@@ -1,0 +1,29 @@
+Array
+(
+    [name] => HP 26A Black Original LaserJet Toner Cartridge
+    [sku] => CF226A
+    [description] => Ideal for printing consistent, quality black-and-white pages at high speeds your HP printer or MFP was built for, while helping protect against fraud.<br>Original HP Toner cartridges with JetIntelligence help you get the most out of your printer—professional documents you can proud of, more pages at fast speeds,<sup>[1]</sup> affordable high-yield options<sup>[2]</sup> and anti-fraud technology.
+    [short_description] => HP 26A Black Original LaserJet Toner Cartridge, 3100 pages, Black, 1 pc(s)
+    [price] => 136.85
+    [tax] => 19
+    [currency] => USD
+    [inventory] => 74
+    [transit] => 0
+    [category] => Array
+        (
+            [0] => printing-supplies
+        )
+
+    [subcategory] => Array
+        (
+            [0] => Toner Cartridges
+        )
+
+    [brand] => Array
+        (
+            [0] => HP
+        )
+
+    [features] => <ul><li><strong>Compatibility:</strong> HP 26 toner cartridges work with: HP LaserJet Pro M402, M426</li><li><strong>Quantity per pack:</strong> 1 pc(s)</li><li><strong>Black toner cartridges quantity:</strong> 1</li><li><strong>Cartridge capacity:</strong> Standard Yield</li><li><strong>Black toner page yield:</strong> 3100 pages</li><li><strong>Type:</strong> Original</li><li><strong>Printing colours:</strong> Black</li><li><strong>Brand compatibility:</strong> HP</li><li><strong>Supply type:</strong> Single pack</li><li><strong>OEM code:</strong> CF226A</li><li><strong>Quantity per box:</strong> 1 pc(s)</li><li><strong>Country of origin:</strong> China, Japan, United States</li><li><strong>HP segment:</strong> Business, Enterprise</li><li><strong>Operating temperature (T-T):</strong> 10 - 32.5 °C</li><li><strong>Operating relative humidity (H-H):</strong> 20 - 80%</li><li><strong>Storage temperature (T-T):</strong> -20 - 40 °C</li><li><strong>Storage relative humidity (H-H):</strong> 10 - 90%</li><li><strong>Width:</strong> 362 mm</li><li><strong>Depth:</strong> 102 mm</li><li><strong>Height:</strong> 198 mm</li><li><strong>Weight:</strong> 700 g</li><li><strong>Package width:</strong> 362 mm</li><li><strong>Package depth:</strong> 102 mm</li><li><strong>Package height:</strong> 198 mm</li><li><strong>Package weight:</strong> 1 kg</li><li><strong>Package type:</strong> Box</li><li><strong>Total carbon footprint (kg of CO2e):</strong> 5.6</li><li><strong>HP GTIN (EAN/UPC):</strong> 889296154761</li><li><strong>Print technology:</strong> Laser printing</li><li><strong>UNSPSC-code:</strong> 44103103</li><li><strong>Box contents:</strong> Toner cartridge; Recycling guide</li><li><strong>Pallet dimensions (W x D x H):</strong> 1098 x 942 x 1134 mm</li><li><strong>Pallet dimensions (W x D x H) (imperial):</strong> 1097.3 x 942.3 x 1132.8 mm (43.2 x 37.1 x 44.6&quot;)</li><li><strong>Pallet weight (imperial):</strong> 155.1 kg (342 lbs)</li><li><strong>Pallet size (EU):</strong> 1100 x 740 x 1139 mm</li><li><strong>Maximum number of stacking cartons:</strong> 20 pc(s)</li><li><strong>Master (outer) cases per pallet layer (EU):</strong> 21 pc(s)</li><li><strong>Harmonized System (HS) code:</strong> 84439990</li><li><strong>Pallet gross weight:</strong> 155.5 kg</li><li><strong>Pallet weight (EU):</strong> 125.5 kg</li><li><strong>Layers per pallet:</strong> 5 pc(s)</li><li><strong>Master (outer) cases per pallet layer:</strong> 27 pc(s)</li><li><strong>Master (outer) cases per pallet:</strong> 135 pc(s)</li><li><strong>Products per pallet:</strong> 135 pc(s)</li><li><strong>Products per pallet (EU):</strong> 105 pc(s)</li></ul>
+    [image] => https://www.nexsysla.com/cl/wp-content/uploads/sites/10/2026/02/cdcb3e6b9513f44e4ed2c9962bda551a4c7acd12.jpg
+)

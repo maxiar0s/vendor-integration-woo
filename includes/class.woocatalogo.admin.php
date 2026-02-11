@@ -278,7 +278,7 @@ class cWooCatalogoAdmin {
                                         echo "<td>".esc_html($option_woocatalogo["comision"])."</td>";
                                         echo "<td>".esc_html($option_woocatalogo["etiquetas_precio"])."</td>";
                                         echo "<td>".esc_html($option_woocatalogo["reg_date"])."</td>";
-                                        echo "<td style='text-align: center;'><button type='button' onclick='fDeleteConfigWooCatalogo(".intval($option_woocatalogo["id"]).")'><span class='dashicons dashicons-remove'></span></button></td>";
+                                        echo "<td style='text-align: center;'><button type='button' aria-label='Eliminar Etiqueta' data-tooltip='Eliminar Etiqueta' onclick='fDeleteConfigWooCatalogo(".intval($option_woocatalogo["id"]).")'><span class='dashicons dashicons-remove'></span></button></td>";
                                     echo "</tr>";
 
                                 }
@@ -444,7 +444,7 @@ class cWooCatalogoAdmin {
 
         if ($aResTagWooCatalogo === false) {
             if($aTagWooCatalogo != "false"){
-                $sInsertWooCatalogo = array('id' => '', 'dolar' => $sDolarWooCatalogo, 'fmult' => $sfmultWooCatalogo,'comision' => $sComWooCatalogo, 'etiquetas_precio' => $aTagWooCatalogo,'reg_date'=> $dTimeWooCatalogo );
+                $sInsertWooCatalogo = array('dolar' => $sDolarWooCatalogo, 'fmult' => $sfmultWooCatalogo,'comision' => $sComWooCatalogo, 'etiquetas_precio' => $aTagWooCatalogo,'reg_date'=> $dTimeWooCatalogo );
                 $wpdb->insert($sTableWooCatalogo,$sInsertWooCatalogo);
                 echo "Creado";
             }else{
@@ -490,7 +490,7 @@ class cWooCatalogoAdmin {
         if (!current_user_can('manage_options')) {
             wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
-        $aDataLicenseWooCatalogo = $_POST['dataLicenseWooCatalogo'];
+        $aDataLicenseWooCatalogo = isset($_POST['dataLicenseWooCatalogo']) ? $_POST['dataLicenseWooCatalogo'] : array();
         
         // Extract Nexsys form data
         $nexsys_email = '';
@@ -553,7 +553,12 @@ class cWooCatalogoAdmin {
 	}
 
 
-	public static function fAjaxEndpointWooCatalogo(){
+    public static function fAjaxEndpointWooCatalogo(){
+        $nonce = isset($_REQUEST['nonce']) ? sanitize_text_field($_REQUEST['nonce']) : '';
+        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
+        }
+
         if (!current_user_can('manage_options')) {
             wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }

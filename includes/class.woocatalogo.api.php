@@ -118,18 +118,65 @@ class cWooCatalogoApiRequest {
     public static function fGetCatalogExtendWooCatalogo($part_number) {
         $provider = self::get_provider_instance();
         $details = $provider->getProductDetails($part_number);
+        $provider_slug = ucfirst($provider->getProviderSlug()); // e.g., Nexsys
         
         if ($details) {
-            // If details is already strict format
-             if (is_array($details) && isset($details['data'])) {
-                $items = [];
-                foreach ($details['data'] as $d) $items[] = (object)$d;
-                return (object) ['data' => $items];
-             }
+            $items = [];
+            $raw_items = [];
 
-             // If details is single product array/object
-             $item = is_array($details) ? (object)$details : $details;
-             return (object) ['data' => [$item]];
+            if (is_array($details) && isset($details['data'])) {
+                $raw_items = $details['data'];
+            } elseif (is_array($details)) { // Single item or list without 'data' wrapper
+                 $raw_items = isset($details[0]) ? $details : [$details];
+            } else {
+                 $raw_items = [$details];
+            }
+
+            foreach ($raw_items as $d) {
+                $obj = (object)$d;
+                
+                // Normalization Logic
+                if (!isset($obj->part_number)) {
+                    // Try to find a suitable candidate
+                    $obj->part_number = isset($obj->mpn) ? $obj->mpn : (isset($obj->sku) ? $obj->sku : '');
+                }
+                
+                if (!isset($obj->proveedor)) {
+                    $obj->proveedor = $provider_slug;
+                }
+                
+                 // Map generic fields if missing
+                if (!isset($obj->nombre_producto)) {
+                     // Check 'name' or 'title'
+                     if (isset($obj->name)) $obj->nombre_producto = $obj->name;
+                     elseif (isset($obj->title) && is_object($obj->title)) $obj->nombre_producto = $obj->title->rendered;
+                     elseif (isset($obj->title)) $obj->nombre_producto = $obj->title;
+                }
+                
+                if (!isset($obj->precio)) {
+                     $obj->precio = isset($obj->price) ? $obj->price : 0;
+                     // Handle potential string formatting if needed, though sanitize usually handles it elsewhere
+                }
+                
+                // Ensure other fields expected by product.php exist
+                // product.php uses: descripcion, htmlContent, caracteristicas
+                if (!isset($obj->descripcion)) $obj->descripcion = isset($obj->short_description) ? $obj->short_description : '';
+                
+                 // If htmlContent is missing, construct it from description or content
+                if (!isset($obj->htmlContent)) {
+                    $obj->htmlContent = isset($obj->content->rendered) ? $obj->content->rendered : (isset($obj->content) ? $obj->content : '');
+                     if (empty($obj->htmlContent)) $obj->htmlContent = $obj->descripcion;
+                }
+                
+                if (!isset($obj->caracteristicas)) {
+                     // If features are returned as 'attributes' or similar
+                     $obj->caracteristicas = isset($obj->attributes) ? $obj->attributes : [];
+                }
+
+                $items[] = $obj;
+            }
+            
+            return (object) ['data' => $items];
         }
         
         return (object) ['data' => []];
