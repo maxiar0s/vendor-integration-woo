@@ -40,7 +40,8 @@ class cCatalogWooCatalog {
             }
         }
 
-        $oCatalogWooCatalogo = (new cWooCatalogoApiRequest())->fgetCatalogWooCatalogo();
+        $awooArray = [];
+        $oCatalogWooCatalogo = (new cWooCatalogoApiRequest())->fGetCatalogWooCatalogo();
 
 
         // Verificar que la propiedad "data" existe y es un array

@@ -55,7 +55,12 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
             'password' => $this->password
         ]);
 
-        $response = $this->remoteRequest($url, 'POST', ['Content-Type' => 'application/json'], $body);
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Accept'       => 'application/json'
+        ];
+
+        $response = $this->remoteRequest($url, 'POST', $headers, $body);
 
         if ($response && isset($response['token'])) {
             set_transient(self::TRANSIENT_TOKEN_KEY, $response['token'], self::TOKEN_EXPIRATION);
@@ -98,9 +103,17 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
                 break;
             }
 
-            foreach ($response as $product) {
+            if (!$response || !isset($response['data'])) break;
+            
+            $products_list = $response['data'];
+
+            $logged = false;
+            foreach ($products_list as $product) {
+                if (!$logged) {
+                    file_put_contents(__DIR__ . '/product_debug_log.txt', print_r($product, true));
+                    $logged = true;
+                }
                 // Use SKU or MPN as common identifier.
-                
                 $mpn = isset($product['mpn']) ? $product['mpn'] : (isset($product['sku']) ? $product['sku'] : '');
                 if (empty($mpn)) continue;
 
@@ -109,7 +122,7 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
                     'sku'           => $product['sku'],
                     'part_number'   => $mpn,
                     'nombre_producto' => isset($product['name']) ? $product['name'] : (isset($product['title']['rendered']) ? $product['title']['rendered'] : ''),
-                    'stock'         => isset($product['stock_quantity']) ? $product['stock_quantity'] : 0,
+                    'stock'         => isset($product['stock_quantity']) ? $product['stock_quantity'] : (isset($product['inventory']) ? $product['inventory'] : 0),
                     'precio'        => isset($product['price']) ? $product['price'] : 0,
                     'categoria'     => 'Sin Categoria', // Nexsys categories mapping needed
                     'proveedor'     => 'Nexsys', 
@@ -123,7 +136,7 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
             
             // Check if we should continue
             // If response count < per_page, we're done.
-            if (count($response) < $per_page) {
+            if (count($products_list) < $per_page) {
                 break;
             }
             
