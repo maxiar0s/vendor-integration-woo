@@ -403,6 +403,8 @@ class cWooCatalogoAdmin {
         </table>
     </div>
 
+        <div class="popup-overlay"></div>
+        <div class="loader-woocatalogo centered-woocatalogo" style='display: none;'></div>
     </div>
     <?php
     }
@@ -428,7 +430,8 @@ class cWooCatalogoAdmin {
                 <p id="estado-progreso" style="font-size: larger;">0 productos actualizados -  0 productos encontrados</p> 
                 
             </div>
-        </div>
+        <div class="popup-overlay"></div>
+        <div class="loader-woocatalogo centered-woocatalogo" style='display: none;'></div>
         </div>
         <?php
 
