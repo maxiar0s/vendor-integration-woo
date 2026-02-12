@@ -84,12 +84,10 @@ class cWooCatalogoAdmin {
         </div>
     
         <div class="card">
-            <div class="logo-contend">
-                <img src="<?php echo plugins_url('../admin/img/logowoocatalogo.png',__FILE__)?>">
-            </div>
+
             <div class="gracias">
                 <h3 class="title">Vendor Integration Woo</h3>
-                <p>Presentamos "Vendor Integration Woo": un plugin que sincroniza catálogos de productos de proveedores, actualizando precios y existencias con tu tienda. Optimiza tu catálogo y mejora la experiencia de compra de tus clientes. ¡Simplifica la gestión de productos y potencia tu tienda en línea con Vendor Integration Woo!</p>
+                <p>Vendor Integration Woo es un plugin para integrar productos de proveedores en tu tienda de WooCommerce.</p>
             </div>
         </div>
     
@@ -235,29 +233,37 @@ class cWooCatalogoAdmin {
                         <div class="viw-modal-column-left">
                             <form class="saveconfig" id="fSaveConfigGlobWooCatalogo" method="post">
 
-                                <label for="ganancia-woocatalogo">Ganacia</label><br>
-                                <input type="number" id="gan-woocatalogo" name="ganancia-woocatalogo" step="0.0001" value="<?php echo esc_attr($ganancia); ?>"><br>
+                                <div class="viw-form-group">
+                                    <label for="ganancia-woocatalogo">Ganacia</label>
+                                    <input type="number" id="gan-woocatalogo" name="ganancia-woocatalogo" step="0.0001" value="<?php echo esc_attr($ganancia); ?>">
+                                </div>
 
-                                <label for="comision-woocatalogo">Comisión</label><br>
-                                <input type="number" id="comision-woocatalogo" name="comision-woocatalogo" step="0.0001" value="<?php echo esc_attr($comision); ?>"><br>
+                                <div class="viw-form-group">
+                                    <label for="comision-woocatalogo">Comisión</label>
+                                    <input type="number" id="comision-woocatalogo" name="comision-woocatalogo" step="0.0001" value="<?php echo esc_attr($comision); ?>">
+                                </div>
 
-                                <label for="dolar-woocatalogo">Dolar</label><br>
-                                <input type="number" id="dolar-woocatalogo" name="dolar-woocatalogo" step="0.0001" value="<?php echo esc_attr($dolar); ?>"><br>
+                                <div class="viw-form-group">
+                                    <label for="dolar-woocatalogo">Dolar</label>
+                                    <input type="number" id="dolar-woocatalogo" name="dolar-woocatalogo" step="0.0001" value="<?php echo esc_attr($dolar); ?>">
+                                </div>
 
-                                <label for="categories-woocatalogo">Etiquetas</label><br>
-                                <select name="categories-woocatalogo" id="categories-woocatalogo" style="width:100%">
-                                <?php
-                                    $all_tags = get_terms ('product_tag');
-                                    if($all_tags){
-                                        foreach ($all_tags as $tag) {
-                                            echo ' <option value="'.esc_attr($tag->name).'">'.esc_html($tag->name).'</option>';
-                                        } 
-                                    }else{
-                                        echo ' <option value="false">Sin resultados</option>';
-                                    }
-  
-                                ?>
-                                </select><br>
+                                <div class="viw-form-group">
+                                    <label for="categories-woocatalogo">Etiquetas</label>
+                                    <select name="categories-woocatalogo" id="categories-woocatalogo" style="width:100%">
+                                    <?php
+                                        $all_tags = get_terms ('product_tag');
+                                        if($all_tags){
+                                            foreach ($all_tags as $tag) {
+                                                echo ' <option value="'.esc_attr($tag->name).'">'.esc_html($tag->name).'</option>';
+                                            } 
+                                        }else{
+                                            echo ' <option value="false">Sin resultados</option>';
+                                        }
+    
+                                    ?>
+                                    </select>
+                                </div>
                             
                                 <input type="submit" name="submit" class="button button-primary" id="fSaveConfigWooCatalogo" value="<?php  _e('Guardar o Actualizar', 'vendor-integration-woo')?>">
 

@@ -440,3 +440,18 @@
   visibility: visible;
   transform: translateX(-50%) translateY(0);
 }
+
+/* Form Grouping for tighter labels */
+.viw-modal-column-left .viw-form-group {
+  margin-bottom: 16px;
+}
+
+.viw-modal-column-left .viw-form-group label {
+  margin-bottom: 4px; /* Closer to input */
+}
+
+/* Add space before the submit button in modal */
+#fSaveConfigWooCatalogo {
+  margin-top: 24px;
+  width: 100%; /* Optional: make it full width implies better CTA, but user just asked for space */
+}
