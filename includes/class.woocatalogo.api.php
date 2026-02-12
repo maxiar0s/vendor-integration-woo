@@ -145,6 +145,11 @@ class cWooCatalogoApiRequest {
                     $obj->proveedor = $provider_slug;
                 }
                 
+                // Map currency
+                if (!isset($obj->moneda)) {
+                    $obj->moneda = isset($obj->currency) ? $obj->currency : 'USD';
+                }
+
                  // Map generic fields if missing
                 if (!isset($obj->nombre_producto)) {
                      // Check 'name' or 'title'

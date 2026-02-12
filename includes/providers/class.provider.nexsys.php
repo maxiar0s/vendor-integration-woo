@@ -79,6 +79,50 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
         return $token;
     }
 
+    protected function remoteRequest($url, $method = 'GET', $headers = [], $body = []) {
+        // Prevent recursion: If this is a login request, do not apply retry logic
+        if (strpos($url, 'login') !== false) {
+            return parent::remoteRequest($url, $method, $headers, $body);
+        }
+
+        $response = parent::remoteRequest($url, $method, $headers, $body);
+
+        // Handle 429 Too Many Requests
+        if ($response === false && $this->last_response_code == 429) {
+            $this->log("Rate limited (429). Sleeping for 2 seconds and retrying...");
+            sleep(2);
+            return parent::remoteRequest($url, $method, $headers, $body);
+        }
+
+        // Check for 401/403 Forbidden - Token Expired
+        if ($response === false && ($this->last_response_code == 401 || $this->last_response_code == 403)) {
+            $this->log("Token expired (Code: {$this->last_response_code}). Re-authenticating...");
+            
+            // 1. Delete expired token
+            delete_transient(self::TRANSIENT_TOKEN_KEY);
+            delete_transient('woocatalogo_nexsys_auth_error');
+
+            // 2. Re-authenticate
+            if ($this->login()) {
+                $this->log("Re-authentication successful. Retrying request...");
+                
+                // 3. Update headers with new token
+                $newToken = get_transient(self::TRANSIENT_TOKEN_KEY);
+                if (isset($headers['Authorization'])) {
+                    $headers['Authorization'] = 'Bearer ' . $newToken;
+                }
+                
+                // 4. Retry request
+                return parent::remoteRequest($url, $method, $headers, $body);
+            } else {
+                $this->log("Re-authentication failed. Please check credentials.");
+                set_transient('woocatalogo_nexsys_auth_error', 'Error de autenticación Nexsys. Por favor, revise sus credenciales.', DAY_IN_SECONDS);
+            }
+        }
+
+        return $response;
+    }
+
     public function getCatalog($page = 1, $per_page = 100) {
         $token = $this->getToken();
         if (!$token) return [];
@@ -124,6 +168,7 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
                     'nombre_producto' => isset($product['name']) ? $product['name'] : (isset($product['title']['rendered']) ? $product['title']['rendered'] : ''),
                     'stock'         => isset($product['stock_quantity']) ? $product['stock_quantity'] : (isset($product['inventory']) ? $product['inventory'] : 0),
                     'precio'        => isset($product['price']) ? $product['price'] : 0,
+                    'moneda'        => isset($product['currency']) ? $product['currency'] : 'USD',
                     'categoria'     => 'Sin Categoria', // Nexsys categories mapping needed
                     'proveedor'     => 'Nexsys', 
                     'created_at'    => current_time('mysql'),
@@ -163,13 +208,31 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
             // Check for 'data' wrapper as seen in getCatalog
             $data = isset($response['data']) ? $response['data'] : $response;
 
-            // If array check first item.
-            $item = is_array($data) && isset($data[0]) ? $data[0] : $data;
+            // Strict Filtering: Find the exact match in the returned array
+            if (is_array($data)) {
+                foreach ($data as $item) {
+                     $api_sku = isset($item['sku']) ? $item['sku'] : '';
+                     $api_mpn = isset($item['mpn']) ? $item['mpn'] : '';
 
-            return [
-                'price' => isset($item['price']) ? $item['price'] : 0,
-                'stock' => isset($item['stock_quantity']) ? $item['stock_quantity'] : 0
-            ];
+                     // Compare with both SKU and Part Number (ignoring case)
+                     if (strcasecmp($api_sku, $searchKey) === 0 || strcasecmp($api_mpn, $searchKey) === 0) {
+                         return [
+                            'price' => isset($item['price']) ? $item['price'] : 0,
+                            'stock' => isset($item['stock_quantity']) ? $item['stock_quantity'] : 0
+                        ];
+                     }
+                }
+            } elseif (is_object($data)) {
+                 // Single object check (less likely if endpoint returns list, but good for safety)
+                 $api_sku = isset($data['sku']) ? $data['sku'] : '';
+                 $api_mpn = isset($data['mpn']) ? $data['mpn'] : '';
+                 if (strcasecmp($api_sku, $searchKey) === 0 || strcasecmp($api_mpn, $searchKey) === 0) {
+                    return [
+                        'price' => isset($data['price']) ? $data['price'] : 0,
+                        'stock' => isset($data['stock_quantity']) ? $data['stock_quantity'] : 0
+                    ];
+                }
+            }
         }
 
         return ['price' => 0, 'stock' => 0];
@@ -183,6 +246,22 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract {
         $url = add_query_arg('sku', $part_number, $this->getBaseUrl() . 'products');
         $headers = ['Authorization' => 'Bearer ' . $token];
         
-        return $this->remoteRequest($url, 'GET', $headers);
+        $response = $this->remoteRequest($url, 'GET', $headers);
+
+        if ($response && isset($response['data']) && is_array($response['data'])) {
+            foreach ($response['data'] as $product) {
+                $api_sku = isset($product['sku']) ? $product['sku'] : '';
+                $api_mpn = isset($product['mpn']) ? $product['mpn'] : '';
+
+                // Strict comparison
+                if (strcasecmp($api_sku, $part_number) === 0 || strcasecmp($api_mpn, $part_number) === 0) {
+                    return $product;
+                }
+            }
+            // If we iterated through all results and found no match, return false/empty
+            return false;
+        }
+
+        return $response;
     }
 }

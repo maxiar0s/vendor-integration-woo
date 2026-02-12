@@ -116,6 +116,16 @@ class cProductWooCatalogo {
         
         $msg = ""; 
 
+        // Get global settings
+        $config_woocatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+        $dolar = 1; $comision = 1; $ganancia = 1;
+
+        if ($config_woocatalogo) {
+            $dolar = !empty($config_woocatalogo[0]['dolar']) ? floatval($config_woocatalogo[0]['dolar']) : 1;
+            $comision = !empty($config_woocatalogo[0]['comision']) ? floatval($config_woocatalogo[0]['comision']) : 1;
+            $ganancia = !empty($config_woocatalogo[0]['fmult']) ? floatval($config_woocatalogo[0]['fmult']) : 1;
+        } 
+
         // Verificamos si existe la clave 'data' en el objeto
         if (isset($oCreateProductWooCatalogo->data) && is_array($oCreateProductWooCatalogo->data)) {
             $found_provider = false;
@@ -160,11 +170,20 @@ class cProductWooCatalogo {
                         $product->set_name(isset($producto->nombre_producto) ? $producto->nombre_producto : 'Sin Nombre');
                         $product->set_sku($producto->part_number);
 
-                        $price = isset($producto->precio) && is_numeric($producto->precio) ? $producto->precio : 0;
-                        $precio_inflado = ceil($price * 99000000); 
-                        if ($price == 0) { $precio_inflado = 99999999; }
+                        $price = isset($producto->precio) && is_numeric($producto->precio) ? floatval($producto->precio) : 0;
+                        $moneda = isset($producto->moneda) ? $producto->moneda : 'USD';
+                        
+                        // If currency is CLP, do not apply Dolar conversion (factor = 1)
+                        $tipo_cambio = ($moneda === 'CLP') ? 1 : $dolar;
 
-                        $product->set_regular_price($precio_inflado);
+                        // Calculate final price: Price * Type_Exchange * Margin * Commission
+                        if ($price > 0) {
+                            $final_price = ceil($price * $tipo_cambio * $ganancia * $comision);
+                        } else {
+                            $final_price = 99999999;
+                        }
+
+                        $product->set_regular_price($final_price);
                         $product->set_manage_stock(true);
                         $product->set_stock_status('instock');
                         $product->set_stock_quantity(1);

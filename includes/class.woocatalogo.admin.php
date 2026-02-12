@@ -12,6 +12,19 @@ if (!defined('ABSPATH')) exit;
 
 class cWooCatalogoAdmin {
 
+    public static function fAdminNoticesWooCatalogo() {
+        $error = get_transient('woocatalogo_nexsys_auth_error');
+        if ($error) {
+            ?>
+            <div class="notice notice-error is-dismissible">
+                <p><?php echo esc_html($error); ?></p>
+            </div>
+            <?php
+            // Optionally delete after showing, or keep until success
+            // delete_transient('woocatalogo_nexsys_auth_error'); 
+        }
+    }
+
 
     //funcion para registrar el menu del administrador
     public static function fCreateMenuWooCatalogo() {
@@ -24,6 +37,7 @@ class cWooCatalogoAdmin {
             'dashicons-money-alt', // Icono que se mostrará junto al menú (en este caso, un icono de dinero)
             '65' // Posición en la que se mostrará el menú dentro del menú de WordPress
         );
+        add_action('admin_notices', ['cWooCatalogoAdmin', 'fAdminNoticesWooCatalogo']);
     }
     
     public static function fCreateSubMenuWooCatalogo() {
@@ -510,6 +524,10 @@ class cWooCatalogoAdmin {
         if (!empty($nexsys_email)) update_option('woocatalogo_nexsys_email', sanitize_email($nexsys_email));
         if (!empty($nexsys_password)) update_option('woocatalogo_nexsys_password', sanitize_text_field($nexsys_password));
         if (!empty($nexsys_country)) update_option('woocatalogo_nexsys_country', sanitize_text_field($nexsys_country));
+
+        // Delete token to force re-authentication
+        delete_transient('woocatalogo_nexsys_token');
+        delete_transient('woocatalogo_nexsys_auth_error');
 
         echo "Configuración Nexsys guardada";
         wp_die();

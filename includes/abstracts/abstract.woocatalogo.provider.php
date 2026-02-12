@@ -19,6 +19,7 @@ abstract class WooCatalogoProviderAbstract implements WooCatalogoProviderInterfa
     protected $password;
     protected $country;
     protected $slug;
+    protected $last_response_code = 0;
 
     public function __construct($settings = []) {
         $this->slug = $this->getProviderSlug();
@@ -40,6 +41,14 @@ abstract class WooCatalogoProviderAbstract implements WooCatalogoProviderInterfa
         }
     }
 
+    /**
+     * Get the last HTTP response code.
+     * @return int
+     */
+    public function getLastResponseCode() {
+        return $this->last_response_code;
+    }
+
     /* Helper for cURL requests */
     protected function remoteRequest($url, $method = 'GET', $headers = [], $body = []) {
         $args = [
@@ -57,10 +66,13 @@ abstract class WooCatalogoProviderAbstract implements WooCatalogoProviderInterfa
 
         if (is_wp_error($response)) {
             $this->log("Request Error: " . $response->get_error_message());
+            $this->last_response_code = 0;
             return false;
         }
 
         $code = wp_remote_retrieve_response_code($response);
+        $this->last_response_code = $code;
+
         if ($code >= 400) {
             $this->log("HTTP Error {$code}: " . wp_remote_retrieve_body($response));
             return false;

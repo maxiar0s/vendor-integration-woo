@@ -44,8 +44,22 @@ class cCatalogWooCatalog {
         $oCatalogWooCatalogo = (new cWooCatalogoApiRequest())->fGetCatalogWooCatalogo();
 
 
+        // Get global settings
+        $config_woocatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+        $dolar = 1; $comision = 1; $ganancia = 1;
+
+        if ($config_woocatalogo) {
+            $dolar = !empty($config_woocatalogo[0]['dolar']) ? floatval($config_woocatalogo[0]['dolar']) : 1;
+            $comision = !empty($config_woocatalogo[0]['comision']) ? floatval($config_woocatalogo[0]['comision']) : 1;
+            $ganancia = !empty($config_woocatalogo[0]['fmult']) ? floatval($config_woocatalogo[0]['fmult']) : 1;
+        }
+
         // Verificar que la propiedad "data" existe y es un array
         if (isset($oCatalogWooCatalogo->data) && is_array($oCatalogWooCatalogo->data)) {
+            $count = count($oCatalogWooCatalogo->data);
+            error_log("Debug Catalog: Item count: {$count} | Config - Dolar: {$dolar}, Ganancia: {$ganancia}, Comision: {$comision}");
+            
+            $i = 0; // Initialize debug counter
             foreach ($oCatalogWooCatalogo->data as $producto) {
 
                 // Buscar el producto por partnumber o SKU
@@ -58,14 +72,33 @@ class cCatalogWooCatalog {
                 }
 
 
-                $sRes = ($existingProductId) ? "SI" : "NO" ;
-                $awooArray[] = [
-                    'woo'           => $sRes,
-                    'id'            => $producto->id, 
-                    'sku'           => $producto->sku, 
-                    'mpn'           => $producto->part_number,
-                    'nombre'        => $producto->nombre_producto,
-                    'precio'        => $producto->precio,
+                $precio_producto = isset($producto->precio) ? floatval($producto->precio) : 0;
+                $moneda = isset($producto->moneda) ? $producto->moneda : 'USD';
+                
+                // If currency is CLP, do not apply Dolar conversion (factor = 1)
+                $tipo_cambio = ($moneda === 'CLP') ? 1 : $dolar;
+                
+                $precio_final = ceil($precio_producto * $tipo_cambio * $ganancia * $comision);
+
+                // DEBUG LOGGING
+                if ($i < 5) { // Log only first 5 items to avoid flooding
+                    error_log("Debug Price Calc: SKU: {$producto->sku} | Currency: {$moneda} | TRM: {$tipo_cambio} | Raw Price: {$precio_producto} | Ganancia: {$ganancia} | Comision: {$comision} | Final: {$precio_final}");
+                    $i++;
+                }
+
+                // Fallback for zero price
+                if ($precio_producto <= 0) {
+                    $precio_final = 99999999;
+                }
+
+                    $sRes = ($existingProductId) ? "SI" : "NO" ;
+                    $awooArray[] = [
+                        'woo'           => $sRes,
+                        'id'            => $producto->id, 
+                        'sku'           => $producto->sku, 
+                        'mpn'           => $producto->part_number,
+                        'nombre'        => $producto->nombre_producto,
+                        'precio'        => $precio_final,
                     'stock'         => $producto->stock,
                     'categoria'     => $producto->categoria,
                     'subcategoria'  => $producto->subcategoria,
@@ -144,14 +177,14 @@ class cCatalogWooCatalog {
                     $product = wc_get_product($product_id);
                     $oGetPriceWooCatalogo = (new cWooCatalogoApiRequest())->fGetProductPriceStock($part_number, $sku_proveedor, $proveedor);
 
-                    //proteger el precio
-                    $current_price = 9000000;
+                    $current_price = 99999999;
                     // Obtener el nuevo precio desde el webservice
                     $new_price = isset($oGetPriceWooCatalogo->data[0]->precio) ? $oGetPriceWooCatalogo->data[0]->precio : null;
                     
-                    // Comprobar si el nuevo precio es válido (no nulo y no igual a cero)
-                    $checkprecio = (!is_null($new_price) && $new_price > 0) ? $new_price : $current_price;
-                    $price = floatval(sanitize_text_field($checkprecio));
+                    $price = 0;
+                    if (!is_null($new_price) && $new_price > 0) {
+                        $price = floatval(sanitize_text_field($new_price));
+                    }
 
                     $etiquetas = get_the_terms ( $product_id, 'product_tag' );
                     $etiquetas_precio = isset($etiquetas[0]) ? $etiquetas[0]->name : '';
@@ -161,21 +194,21 @@ class cCatalogWooCatalog {
                         if ($bd_res['etiquetas_precio'] == $etiquetas_precio) {
 
                             if (empty($oTagsDB)) {
-
-                                $dolar    = 99000000;
-                                $fmult = 999999999;
-                                $comision = 999999;
-                                
-
+                                $dolar    = 1;
+                                $fmult = 1;
+                                $comision = 1;
                             }else{
-
                                 $dolar    = floatval($bd_res['dolar']);
                                 $fmult = floatval($bd_res['fmult']);
                                 $comision = floatval($bd_res['comision']);
-
                             }
 
-                            $priceVenta = round(($price*$dolar)*$fmult*$comision,0,PHP_ROUND_HALF_UP);
+                            if ($price > 0) {
+                                $priceVenta = ceil($price * $dolar * $fmult * $comision);
+                            } else {
+                                $priceVenta = 99999999;
+                            }
+                            
                             $product->set_regular_price($priceVenta);
                             $product->save(); 
               
@@ -335,10 +368,13 @@ class cCatalogWooCatalog {
                         
                         // Handle Price
                         if (isset($producto_api->precio)) {
-                            $current_price = 9000000;
+                            $current_price = 99999999;
                             $new_price = $producto_api->precio;
-                            $checkprecio = (!is_null($new_price) && $new_price > 0) ? $new_price : $current_price;
-                            $price = floatval(sanitize_text_field($checkprecio));
+                            
+                            $price = 0;
+                            if (!is_null($new_price) && $new_price > 0) {
+                                $price = floatval(sanitize_text_field($new_price));
+                            }
 
                             $etiquetas = get_the_terms( $producto->ID, 'product_tag' );
                             $etiquetas_precio = isset($etiquetas[0]) ? $etiquetas[0]->name : '';
@@ -349,7 +385,12 @@ class cCatalogWooCatalog {
                                     $fmult = floatval($bd_res['fmult']);
                                     $comision = floatval($bd_res['comision']);
 
-                                    $priceVenta = round(($price*$dolar)*$fmult*$comision,0,PHP_ROUND_HALF_UP);
+                                    if ($price > 0) {
+                                        $priceVenta = ceil($price * $dolar * $fmult * $comision);
+                                    } else {
+                                        $priceVenta = 99999999;
+                                    }
+
                                     $product->set_regular_price($priceVenta);
                                     $product->save(); 
                                 }
