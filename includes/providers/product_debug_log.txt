@@ -1,23 +1,23 @@
 Array
 (
-    [name] => LV
-    [sku] => 21FF000HCL
-    [description] => LV
+    [name] => LV ThinkSmart Core Full Room Kit  Teams
+    [sku] => 12VS0003CS
+    [description] => LV ThinkSmart Core Full Room Kit Teams
     [short_description] => 
-    [price] => 1270
+    [price] => 3700
     [tax] => 
     [currency] => USD
-    [inventory] => 1
+    [inventory] => 9
     [transit] => 0
     [category] => Array
         (
-            [0] => computers
+            [0] => communications-conference-equipment
         )
 
     [subcategory] => Array
         (
-            [0] => Computers
-            [1] => Laptops
+            [0] => Conference &amp; communications equipment
+            [1] => Video Conferencing Systems
         )
 
     [brand] => Array
@@ -25,6 +25,7 @@ Array
             [0] => Lenovo
         )
 
-    [features] => 
-    [image] => https://www.nexsysla.com/cl/wp-content/uploads/sites/10/2025/05/21FF000HCL.jpg
+    [features] => <p>0</p>
+
+    [image] => https://www.nexsysla.com/cl/wp-content/uploads/sites/10/2025/05/12VS0003CS.jpg
 )

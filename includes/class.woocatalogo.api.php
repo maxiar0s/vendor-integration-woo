@@ -1,5 +1,6 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if (!defined('ABSPATH'))
+    exit;
 /**
  * Clases de Consulta a Api- WooCatalogo
  * @link        https://siroe.cl
@@ -10,28 +11,31 @@ if (!defined('ABSPATH')) exit;
  */
 
 
-class cWooCatalogoApiRequest {
+class cWooCatalogoApiRequest
+{
 
     /**
      * Get the Nexsys provider instance.
      * 
      * @return WooCatalogoNexsysProvider
      */
-    public static function get_provider_instance() {
+    public static function get_provider_instance()
+    {
         return new WooCatalogoNexsysProvider();
     }
 
     /**
      * Generates CSV catalog from Nexsys provider.
      */
-    public static function fGenerateCatalogCSV() {
+    public static function fGenerateCatalogCSV()
+    {
         $all_products = [];
-        
+
         try {
             $provider = self::get_provider_instance();
             $catalogData = $provider->getCatalog();
             if ($catalogData && is_array($catalogData)) {
-               $all_products = $catalogData; 
+                $all_products = $catalogData;
             }
         } catch (Exception $e) {
             error_log("Error fetching catalog from Nexsys: " . $e->getMessage());
@@ -42,7 +46,7 @@ class cWooCatalogoApiRequest {
         $csvData[] = ['Part Number', 'Nombre Producto', 'Categoria', 'Proveedor', 'Precio', 'Stock', 'SKU'];
 
         foreach ($all_products as $prod) {
-             $csvData[] = [
+            $csvData[] = [
                 isset($prod['part_number']) ? $prod['part_number'] : '',
                 isset($prod['nombre_producto']) ? $prod['nombre_producto'] : '',
                 isset($prod['categoria']) ? $prod['categoria'] : '',
@@ -55,13 +59,14 @@ class cWooCatalogoApiRequest {
 
         self::fDownloadCSV($csvData, 'catalogo_consolidado.csv');
     }
-    
-    private static function fDownloadCSV($data, $filename) {
+
+    private static function fDownloadCSV($data, $filename)
+    {
         if (!headers_sent()) {
             header('Content-Type: text/csv');
             header('Content-Disposition: attachment; filename="' . $filename . '";');
         }
-        
+
         $output = fopen('php://output', 'w');
         foreach ($data as $row) {
             fputcsv($output, $row);
@@ -69,34 +74,36 @@ class cWooCatalogoApiRequest {
         fclose($output);
         exit;
     }
-    
+
     /**
      * Fetch product price and stock from Nexsys provider.
      */
-    public static function fGetProductPriceStock($part_number, $sku, $proveedor) {
+    public static function fGetProductPriceStock($part_number, $sku, $proveedor)
+    {
         $provider = self::get_provider_instance();
-        
+
         // Standard Interface call
         $data = $provider->getProductStockPrice($part_number, $sku);
-        
+
         // Wrap to match legacy expectation: ->data[0]->precio
         if ($data) {
-             $formatted = (object) [
-                 'precio' => $data['price'],
-                 'stock' => $data['stock'],
-                 'precioMasBajo' => $data['price'],
-                 'stockMasBajo' => $data['stock']
-             ];
-             return (object) ['data' => [$formatted]];
+            $formatted = (object) [
+                'precio' => $data['price'],
+                'stock' => $data['stock'],
+                'precioMasBajo' => $data['price'],
+                'stockMasBajo' => $data['stock']
+            ];
+            return (object) ['data' => [$formatted]];
         }
-        
+
         return (object) ['data' => []];
     }
-       
+
     /**
      * Get Catalog for JSON update.
      */
-    public static function fGetCatalogWooCatalogo() {
+    public static function fGetCatalogWooCatalogo()
+    {
         $merged_data = [];
 
         try {
@@ -104,22 +111,23 @@ class cWooCatalogoApiRequest {
             $data = $provider->getCatalog();
             if ($data && is_array($data)) {
                 foreach ($data as $item) {
-                     // Cast to object for legacy code compatibility ($item->param)
-                     $merged_data[] = (object) $item;
+                    // Cast to object for legacy code compatibility ($item->param)
+                    $merged_data[] = (object) $item;
                 }
             }
         } catch (Exception $e) {
-             error_log("Error in fGetCatalogWooCatalogo: " . $e->getMessage());
+            error_log("Error in fGetCatalogWooCatalogo: " . $e->getMessage());
         }
 
         return (object) ['data' => $merged_data];
     }
 
-    public static function fGetCatalogExtendWooCatalogo($part_number) {
+    public static function fGetCatalogExtendWooCatalogo($part_number)
+    {
         $provider = self::get_provider_instance();
         $details = $provider->getProductDetails($part_number);
         $provider_slug = ucfirst($provider->getProviderSlug()); // e.g., Nexsys
-        
+
         if ($details) {
             $items = [];
             $raw_items = [];
@@ -127,56 +135,65 @@ class cWooCatalogoApiRequest {
             if (is_array($details) && isset($details['data'])) {
                 $raw_items = $details['data'];
             } elseif (is_array($details)) { // Single item or list without 'data' wrapper
-                 $raw_items = isset($details[0]) ? $details : [$details];
+                $raw_items = isset($details[0]) ? $details : [$details];
             } else {
-                 $raw_items = [$details];
+                $raw_items = [$details];
             }
 
             foreach ($raw_items as $d) {
-                $obj = (object)$d;
-                
+                $obj = (object) $d;
+
                 // Normalization Logic
                 if (!isset($obj->part_number)) {
                     // Try to find a suitable candidate
                     $obj->part_number = isset($obj->mpn) ? $obj->mpn : (isset($obj->sku) ? $obj->sku : '');
                 }
-                
+
                 if (!isset($obj->proveedor)) {
                     $obj->proveedor = $provider_slug;
                 }
-                
+
                 // Map currency
                 if (!isset($obj->moneda)) {
                     $obj->moneda = isset($obj->currency) ? $obj->currency : 'USD';
                 }
 
-                 // Map generic fields if missing
+                // Map generic fields if missing
                 if (!isset($obj->nombre_producto)) {
-                     // Check 'name' or 'title'
-                     if (isset($obj->name)) $obj->nombre_producto = $obj->name;
-                     elseif (isset($obj->title) && is_object($obj->title)) $obj->nombre_producto = $obj->title->rendered;
-                     elseif (isset($obj->title)) $obj->nombre_producto = $obj->title;
+                    // Check 'name' or 'title'
+                    if (isset($obj->name))
+                        $obj->nombre_producto = $obj->name;
+                    elseif (isset($obj->title) && is_object($obj->title))
+                        $obj->nombre_producto = $obj->title->rendered;
+                    elseif (isset($obj->title))
+                        $obj->nombre_producto = $obj->title;
                 }
-                
+
                 if (!isset($obj->precio)) {
-                     $obj->precio = isset($obj->price) ? $obj->price : 0;
-                     // Handle potential string formatting if needed, though sanitize usually handles it elsewhere
+                    $obj->precio = isset($obj->price) ? $obj->price : 0;
+                    // Handle potential string formatting if needed, though sanitize usually handles it elsewhere
                 }
-                
+
                 // Ensure other fields expected by product.php exist
                 // product.php uses: descripcion, htmlContent, caracteristicas
-                if (!isset($obj->descripcion)) $obj->descripcion = isset($obj->short_description) ? $obj->short_description : '';
-                
-                 // If htmlContent is missing, construct it from description or content
+                if (!isset($obj->descripcion))
+                    $obj->descripcion = isset($obj->short_description) ? $obj->short_description : '';
+
+                // If htmlContent is missing, construct it from description or content
                 if (!isset($obj->htmlContent)) {
                     $obj->htmlContent = isset($obj->content->rendered) ? $obj->content->rendered : (isset($obj->content) ? $obj->content : '');
-                     if (empty($obj->htmlContent)) $obj->htmlContent = $obj->descripcion;
+                    if (empty($obj->htmlContent))
+                        $obj->htmlContent = $obj->descripcion;
                 }
-                
+
                 if (!isset($obj->caracteristicas)) {
-                     // If features are returned as 'attributes' or similar
-                     $obj->caracteristicas = isset($obj->attributes) ? $obj->attributes : [];
+                    // If features are returned as 'attributes' or similar
+                    $obj->caracteristicas = isset($obj->attributes) ? $obj->attributes : [];
                 }
+
+                // Map categories using the provider's logic
+                $obj->categoria = $provider->mapCategory($d);
+                $obj->subcategoria = $provider->mapSubcategory($d);
 
                 // Map 'image' to 'imagen' for consistency
                 if (!isset($obj->imagen)) {
@@ -185,15 +202,16 @@ class cWooCatalogoApiRequest {
 
                 $items[] = $obj;
             }
-            
+
             return (object) ['data' => $items];
         }
-        
+
         return (object) ['data' => []];
     }
 
     // Config Helpers
-    public static function fGetConfigValuesWooCatalogo (){
+    public static function fGetConfigValuesWooCatalogo()
+    {
         global $wpdb;
         $query = "SELECT * FROM {$wpdb->prefix}woocatalogo";
         $result = $wpdb->get_results($query, ARRAY_A);
@@ -202,13 +220,15 @@ class cWooCatalogoApiRequest {
         }
         return $result;
     }
-    
+
     // Compatibility aliases
-    public static function obtaining_data_product_api($part_number, $sku, $proveedor) {
-         return self::fGetProductPriceStock($part_number, $sku, $proveedor);
+    public static function obtaining_data_product_api($part_number, $sku, $proveedor)
+    {
+        return self::fGetProductPriceStock($part_number, $sku, $proveedor);
     }
 
-    public static function obtener_datos_producto_api($part_number, $sku, $proveedor) {
+    public static function obtener_datos_producto_api($part_number, $sku, $proveedor)
+    {
         return self::fGetProductPriceStock($part_number, $sku, $proveedor);
-   }
+    }
 }
