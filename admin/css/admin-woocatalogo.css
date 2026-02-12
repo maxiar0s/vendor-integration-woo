@@ -159,7 +159,7 @@
 }
 
 /* Primary override for the main actions */
-.viw-root .opciones-woocatalogo input#fActualizarWooCatalogoJson {
+.viw-root .opciones-woocatalogo input#viwActualizarWooCatalogoJson {
   background: var(--viw-primary);
   color: white;
   border: none;
@@ -247,11 +247,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+  overflow-y: auto;
+  padding: 24px 0;
+}
+
+#viw-popup.cd-popup {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  z-index: 10000 !important;
 }
 
 .cd-popup.is-visible {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .cd-popup-container {
@@ -265,6 +276,8 @@
   transition: transform 0.3s;
   position: relative;
   text-align: left;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
 }
 
 .viw-modal-grid {
@@ -298,6 +311,35 @@
 
 .viw-tags-history table {
   width: 100%;
+}
+
+.viw-tags-history .viw-modal-action-btn {
+  background: transparent;
+  border: 1px solid var(--viw-border);
+  border-radius: 6px;
+  padding: 6px;
+  color: var(--viw-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 2px;
+  line-height: 1;
+}
+
+.viw-tags-history .viw-modal-action-btn .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.viw-tags-history .viw-modal-action-btn:hover {
+  background: var(--viw-primary);
+  color: white;
+  border-color: var(--viw-primary);
+}
+
+.viw-tags-history .viw-modal-action-btn.viw-modal-action-delete:hover {
+  background: var(--viw-error);
+  border-color: var(--viw-error);
 }
 
 @media (max-width: 768px) {

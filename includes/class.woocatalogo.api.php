@@ -14,6 +14,29 @@ if (!defined('ABSPATH'))
 class cVendorIntegrationApiRequest
 {
 
+    private static function normalizeProviderName($provider_name)
+    {
+        $normalized = strtolower(trim((string) $provider_name));
+        return preg_replace('/[^a-z0-9]/', '', $normalized);
+    }
+
+    private static function isProviderCompatible($provider_name)
+    {
+        if ($provider_name === null || $provider_name === '') {
+            return true;
+        }
+
+        $provider = self::get_provider_instance();
+        $current_slug = self::normalizeProviderName($provider->getProviderSlug());
+        $incoming = self::normalizeProviderName($provider_name);
+
+        if ($incoming === '') {
+            return true;
+        }
+
+        return $incoming === $current_slug;
+    }
+
     /**
      * Get the Nexsys provider instance.
      * 
@@ -80,6 +103,10 @@ class cVendorIntegrationApiRequest
      */
     public static function fGetProductPriceStock($part_number, $sku, $proveedor)
     {
+        if (!self::isProviderCompatible($proveedor)) {
+            return (object) ['data' => []];
+        }
+
         $provider = self::get_provider_instance();
 
         // Standard Interface call
@@ -90,6 +117,7 @@ class cVendorIntegrationApiRequest
             $formatted = (object) [
                 'precio' => $data['price'],
                 'stock' => $data['stock'],
+                'moneda' => isset($data['currency']) ? $data['currency'] : 'USD',
                 'precioMasBajo' => $data['price'],
                 'stockMasBajo' => $data['stock']
             ];

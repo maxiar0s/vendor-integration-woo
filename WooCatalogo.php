@@ -22,18 +22,18 @@ if ( !function_exists( 'add_action' ) ) {
 
 if(!defined('ABSPATH')){die('-1');}
 
-define( 'VENDOR_INTEGRATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'VENDOR_INTEGRATION_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'VIW_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'VIW_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'VENDOR_INTEGRATION_DEBUG_MODE', true);
 
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.php' );
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.api.php' );
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.admin.php' );
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.catalog.php' );
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.product.php' );
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/interfaces/interface.woocatalogo.provider.php' );
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/abstracts/abstract.woocatalogo.provider.php' );
-require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/providers/class.provider.nexsys.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/class.woocatalogo.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/class.woocatalogo.api.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/class.woocatalogo.admin.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/class.woocatalogo.catalog.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/class.woocatalogo.product.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/interfaces/interface.woocatalogo.provider.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/abstracts/abstract.woocatalogo.provider.php' );
+require_once( VIW_PLUGIN_DIR . '/includes/providers/class.provider.nexsys.php' );
 
 // WooCommerce dependency check
 add_action('plugins_loaded', function() {

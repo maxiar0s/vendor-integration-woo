@@ -166,11 +166,11 @@ class cVendorIntegrationAdmin {
             <div class="card" style="max-width: 100%;">
                 <h2 class="title">Mis Proveedores</h2>
                     <p class="submit opciones-woocatalogo">
-                        <input type="submit" name="submit" id="fActualizarWooCatalogoJson" class="button button-primary" value="<?php  _e('Actualizar lista de productos', 'vendor-integration-woo')?>">
-                        <input type="submit" name="submit" id="fUpdateStockWooCatalogo" class="button button-primary" value="<?php  _e('Actualizar Stock en Woocommerce', 'vendor-integration-woo')?>">
-                        <input type="submit" name="submit" id="fUpdatePrecioWooCatalogo" class="button button-primary" value="<?php  _e('Actualizar Precio en Woocommerce', 'vendor-integration-woo')?>">
-                        <input type="submit" name="submit" id="fOpenConfogModalWooCatalogo" class="button button-primary" value="<?php  _e('Configuración Global', 'vendor-integration-woo')?>">
-                        <input type="submit" name="submit" id="fDownLoadCSVWooCatalogo" class="button button-primary" value="<?php  _e('Descargar Catalogo', 'vendor-integration-woo')?>">
+                        <input type="submit" name="submit" id="viwActualizarWooCatalogoJson" class="button button-primary" value="<?php  _e('Actualizar lista de productos', 'vendor-integration-woo')?>">
+                        <input type="submit" name="submit" id="viwUpdateStockWooCatalogo" class="button button-primary" value="<?php  _e('Actualizar Stock en Woocommerce', 'vendor-integration-woo')?>">
+                        <input type="submit" name="submit" id="viwUpdatePrecioWooCatalogo" class="button button-primary" value="<?php  _e('Actualizar Precio en Woocommerce', 'vendor-integration-woo')?>">
+                        <input type="submit" name="submit" id="viwOpenConfigModalWooCatalogo" class="button button-primary" value="<?php  _e('Configuración Global', 'vendor-integration-woo')?>">
+                        <input type="submit" name="submit" id="viwDownLoadCSVWooCatalogo" class="button button-primary" value="<?php  _e('Descargar Catalogo', 'vendor-integration-woo')?>">
 <!--
                         <input type="submit" name="submit" id="fDespublicarProductosWooCatalogo" class="button button-primary" value="<?php  _e('Despublicar productos', 'vendor-integration-woo')?>">
                         <input type="submit" name="submit" id="fCreateProductWooCatalogo" class="button button-primary" value="<?php  _e('Crear Productos Nuevos', 'vendor-integration-woo')?>">
@@ -180,7 +180,7 @@ class cVendorIntegrationAdmin {
                     </p>
             </div>
             <div class="table card" style="max-width: 100%;">
-                <table id="WooCatalogoTable" class="display" style="width:100%">
+                <table id="viwWooCatalogoTable" class="display" style="width:100%">
                     <thead>
                         <tr>
                             
@@ -222,16 +222,16 @@ class cVendorIntegrationAdmin {
         </div>
         
         <!--Configuración Global-->
-        <div id="popup" class="cd-popup" role="alert">
+        <div id="viw-popup" class="cd-popup" role="alert">
             <div class="cd-popup-container">
-            <div class="close" id="fCloseConfogModalWooCatalogo">
-                <a href="#" id="close"><img src="<?php echo plugins_url('../admin/img/closewoocatalogo.png',__FILE__)?>"/></a>
+            <div class="close" id="viwCloseConfigModalWooCatalogo">
+                <a href="#" id="viw-close"><img src="<?php echo plugins_url('../admin/img/closewoocatalogo.png',__FILE__)?>"/></a>
             </div>
                 <div>
                     <h2>Configuración Global</h2>
                     <div class="viw-modal-grid">
                         <div class="viw-modal-column-left">
-                            <form class="saveconfig" id="fSaveConfigGlobWooCatalogo" method="post">
+                            <form class="saveconfig" id="viwSaveConfigGlobWooCatalogo" method="post">
 
                                 <div class="viw-form-group">
                                     <label for="ganancia-woocatalogo">Ganacia</label>
@@ -265,7 +265,7 @@ class cVendorIntegrationAdmin {
                                     </select>
                                 </div>
                             
-                                <input type="submit" name="submit" class="button button-primary" id="fSaveConfigWooCatalogo" value="<?php  _e('Guardar o Actualizar', 'vendor-integration-woo')?>">
+                                <input type="submit" name="submit" class="button button-primary" id="viwSaveConfigWooCatalogo" value="<?php  _e('Guardar o Actualizar', 'vendor-integration-woo')?>">
 
                             </form>
                         </div>
@@ -301,7 +301,10 @@ class cVendorIntegrationAdmin {
                                             echo "<td>".esc_html($option_woocatalogo["comision"])."</td>";
                                             echo "<td>".esc_html($option_woocatalogo["etiquetas_precio"])."</td>";
                                             echo "<td>".esc_html($option_woocatalogo["reg_date"])."</td>";
-                                            echo "<td style='text-align: center;'><button type='button' aria-label='Eliminar Etiqueta' data-tooltip='Eliminar Etiqueta' onclick='fDeleteConfigWooCatalogo(".intval($option_woocatalogo["id"]).")'><span class='dashicons dashicons-remove'></span></button></td>";
+                                            echo "<td style='text-align: center;'>";
+                                            echo "<button type='button' class='viw-modal-action-btn viw-apply-config' aria-label='Aplicar Configuración' data-tooltip='Aplicar Configuración' data-id='".intval($option_woocatalogo["id"])."' data-dolar='".esc_attr($option_woocatalogo["dolar"])."' data-ganancia='".esc_attr($option_woocatalogo["fmult"])."' data-comision='".esc_attr($option_woocatalogo["comision"])."' data-etiqueta='".esc_attr($option_woocatalogo["etiquetas_precio"])."'><span class='dashicons dashicons-yes'></span></button> ";
+                                            echo "<button type='button' class='viw-modal-action-btn viw-modal-action-delete' aria-label='Eliminar Etiqueta' data-tooltip='Eliminar Etiqueta' onclick='viwDeleteConfigWooCatalogo(".intval($option_woocatalogo["id"]).")'><span class='dashicons dashicons-remove'></span></button>";
+                                            echo "</td>";
                                         echo "</tr>";
 
                                     }
@@ -340,7 +343,7 @@ class cVendorIntegrationAdmin {
 
         <div class="wrap">
         <h1>Mis Productos  (Puedes intentar publicar informacion de productos que son de tu bodega)</h1>
-        <table id="productosTableFicha" class="display">
+        <table id="viwProductosTableFicha" class="display">
             <thead>
                 <tr>
                     <th>ID del Producto</th>
@@ -394,7 +397,7 @@ class cVendorIntegrationAdmin {
                         <td><a href="<?php echo $product_link; ?>" target="_blank">Ver Producto</a></td>
                         <td><?php echo esc_html($partnumber); ?></td>
                         <!--<td><button class="accionBtn" data-id="<?php echo $id; ?>"><span class='dashicons dashicons-search'></span>Buscar ficha tecnica</button></td>-->
-                        <td><button type="button" onclick="fUpdateAtrrWooCatalogo('<?php echo $partnumberv2 = ($partnumber != 'Sin partnumber') ? $partnumber : $sku ; ?>')"><span class="dashicons dashicons-search"></span>Buscar ficha tecnica</button></td>
+                        <td><button type="button" onclick="viwUpdateAtrrWooCatalogo('<?php echo $partnumberv2 = ($partnumber != 'Sin partnumber') ? $partnumber : $sku ; ?>')"><span class="dashicons dashicons-search"></span>Buscar ficha tecnica</button></td>
                     </tr>
                 <?php
                 }
@@ -564,10 +567,10 @@ class cVendorIntegrationAdmin {
         // Only insert defaults if table is empty
         $count = $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
         if ($count == 0) {
-            $wpdb->insert(
+                $wpdb->insert(
                 $table_name,
                 array(
-                    'dolar' => 90000000,
+                    'dolar' => 1,
                     'fmult' => 1.12,
                     'comision' => 1.21,
                     'etiquetas_precio' => 'Bodega Externa'
@@ -594,7 +597,7 @@ class cVendorIntegrationAdmin {
             wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
 
-        $json_file = VENDOR_INTEGRATION_PLUGIN_DIR . 'admin/dataWooCatalogo/dataWooCatalogo.json';
+        $json_file = VIW_PLUGIN_DIR . 'admin/dataWooCatalogo/dataWooCatalogo.json';
         if (file_exists($json_file)) {
             header('Content-Type: application/json');
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file

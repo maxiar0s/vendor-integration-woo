@@ -11,6 +11,58 @@ if (!defined('ABSPATH')) exit;
 
 class cVendorIntegrationCatalog {
 
+    private static function normalizeConfigValue($value, $fallback = 1, $field = '')
+    {
+        if (!is_numeric($value)) {
+            return $fallback;
+        }
+
+        $number = floatval($value);
+        if ($field === 'dolar' && $number >= 90000000) {
+            return 1;
+        }
+
+        return ($number > 0) ? $number : $fallback;
+    }
+
+    private static function resolvePriceConfigByTag($configs, $product_tag)
+    {
+        $default_config = array(
+            'dolar' => 1,
+            'fmult' => 1,
+            'comision' => 1,
+        );
+
+        if (empty($configs) || !is_array($configs)) {
+            return $default_config;
+        }
+
+        $normalized_tag = strtolower(trim((string) $product_tag));
+        foreach ($configs as $config) {
+            $config_tag = isset($config['etiquetas_precio']) ? strtolower(trim((string) $config['etiquetas_precio'])) : '';
+            if ($normalized_tag !== '' && $config_tag === $normalized_tag) {
+                return array(
+                    'dolar' => self::normalizeConfigValue(isset($config['dolar']) ? $config['dolar'] : 1, 1, 'dolar'),
+                    'fmult' => self::normalizeConfigValue(isset($config['fmult']) ? $config['fmult'] : 1),
+                    'comision' => self::normalizeConfigValue(isset($config['comision']) ? $config['comision'] : 1),
+                );
+            }
+        }
+
+        $first = $configs[0];
+        return array(
+            'dolar' => self::normalizeConfigValue(isset($first['dolar']) ? $first['dolar'] : 1, 1, 'dolar'),
+            'fmult' => self::normalizeConfigValue(isset($first['fmult']) ? $first['fmult'] : 1),
+            'comision' => self::normalizeConfigValue(isset($first['comision']) ? $first['comision'] : 1),
+        );
+    }
+
+    private static function resolveExchangeFactor($currency, $dolar)
+    {
+        $normalized_currency = strtoupper(trim((string) $currency));
+        return ($normalized_currency === 'CLP') ? 1 : $dolar;
+    }
+
 
     public static function fGetCatalogCSV($nonce) {
 
@@ -41,6 +93,7 @@ class cVendorIntegrationCatalog {
         }
 
         $awooArray = [];
+        $provider_counter = array();
         $oCatalogWooCatalogo = (new cVendorIntegrationApiRequest())->fGetCatalogWooCatalogo();
 
 
@@ -74,6 +127,11 @@ class cVendorIntegrationCatalog {
 
                 $precio_producto = isset($producto->precio) ? floatval($producto->precio) : 0;
                 $moneda = isset($producto->moneda) ? $producto->moneda : 'USD';
+                $provider_name = isset($producto->proveedor) ? trim((string) $producto->proveedor) : 'desconocido';
+                if (!isset($provider_counter[$provider_name])) {
+                    $provider_counter[$provider_name] = 0;
+                }
+                $provider_counter[$provider_name]++;
                 
                 // If currency is CLP, do not apply Dolar conversion (factor = 1)
                 $tipo_cambio = ($moneda === 'CLP') ? 1 : $dolar;
@@ -102,22 +160,22 @@ class cVendorIntegrationCatalog {
                     'stock'         => $producto->stock,
                     'categoria'     => $producto->categoria,
                     'subcategoria'  => $producto->subcategoria,
-                    'proveedor'     => $producto->proveedor,
+                    'proveedor'     => $provider_name,
                     'creado'        => $producto->created_at,
                     'actualizado'   => $producto->updated_at,
                     'acciones'      => "
 
-                        <button type=\"button\" aria-label=\"Ver Precio\" data-tooltip=\"Ver Precio\" onclick=\"fPriceShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-money-alt\"></span></button>
+                        <button type=\"button\" aria-label=\"Ver Precio\" data-tooltip=\"Ver Precio\" onclick=\"viwPriceShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-money-alt\"></span></button>
                         
-                        <button type=\"button\" aria-label=\"Ver Stock\" data-tooltip=\"Ver Stock\" onclick=\"fStockShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-products\"></span></button>
+                        <button type=\"button\" aria-label=\"Ver Stock\" data-tooltip=\"Ver Stock\" onclick=\"viwStockShowWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-products\"></span></button>
 
-                        <button type=\"button\" aria-label=\"Insertar Producto\" data-tooltip=\"Insertar Producto\" onclick=\"fInsertProductWooCatalogo('{$producto->part_number}','{$producto->proveedor}' )\"><span class=\"dashicons dashicons-insert\"></span></button>
+                        <button type=\"button\" aria-label=\"Insertar Producto\" data-tooltip=\"Insertar Producto\" onclick=\"viwInsertProductWooCatalogo('{$producto->part_number}','{$producto->proveedor}' )\"><span class=\"dashicons dashicons-insert\"></span></button>
 
-                        <button type=\"button\" aria-label=\"Eliminar Producto\" data-tooltip=\"Eliminar Producto\" onclick=\"fDeleteProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-remove\"></span></button>
+                        <button type=\"button\" aria-label=\"Eliminar Producto\" data-tooltip=\"Eliminar Producto\" onclick=\"viwDeleteProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-remove\"></span></button>
 
-                        <button type=\"button\" aria-label=\"Actualizar Ficha Técnica\" data-tooltip=\"Actualizar Ficha Técnica\" onclick=\"fUpdateAtrrWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-database-add\"></span></button>
+                        <button type=\"button\" aria-label=\"Actualizar Ficha Técnica\" data-tooltip=\"Actualizar Ficha Técnica\" onclick=\"viwUpdateAtrrWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-database-add\"></span></button>
 
-                        <button type=\"button\" aria-label=\"Vista Previa\" data-tooltip=\"Vista Previa\" onclick=\"fPreviewProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-share-alt2\"></span></button>
+                        <button type=\"button\" aria-label=\"Vista Previa\" data-tooltip=\"Vista Previa\" onclick=\"viwPreviewProductWooCatalogo('{$producto->part_number}')\"><span class=\"dashicons dashicons-share-alt2\"></span></button>
 
                     "
 
@@ -129,8 +187,21 @@ class cVendorIntegrationCatalog {
         }
 
         $jCatalog= json_encode(array('data' => $awooArray));
-        file_put_contents(VENDOR_INTEGRATION_PLUGIN_DIR.'/admin/dataWooCatalogo/dataWooCatalogo.json', $jCatalog);
-        echo "Actualización del catálogo completa";
+        $json_file = VIW_PLUGIN_DIR.'/admin/dataWooCatalogo/dataWooCatalogo.json';
+        $bytes_written = file_put_contents($json_file, $jCatalog);
+        if ($bytes_written === false) {
+            if (defined('VENDOR_INTEGRATION_DEBUG_MODE') && VENDOR_INTEGRATION_DEBUG_MODE) {
+                error_log('Vendor Integration Debug: Error al escribir JSON en ' . $json_file);
+            }
+            echo "No se pudo escribir el archivo del catálogo";
+            wp_die();
+        }
+
+        if (defined('VENDOR_INTEGRATION_DEBUG_MODE') && VENDOR_INTEGRATION_DEBUG_MODE) {
+            error_log('Vendor Integration Debug: JSON actualizado en ' . $json_file . ' | Items: ' . count($awooArray) . ' | Proveedores: ' . wp_json_encode($provider_counter));
+        }
+
+        echo "Actualización del catálogo completa | Items: " . count($awooArray) . " | Proveedores: " . wp_json_encode($provider_counter);
         wp_die();
     }
 
@@ -171,15 +242,21 @@ class cVendorIntegrationCatalog {
                 $product_id = wc_get_product_id_by_sku($part_number);
                 $proveedor = get_post_meta($product_id, '_proveedor', true);
                 $sku_proveedor = get_post_meta($product_id, '_sku_proveedor', true);
+                if (empty($sku_proveedor)) {
+                    $sku_proveedor = $part_number;
+                }
 
                 if ($product_id && $proveedor) {
 
                     $product = wc_get_product($product_id);
                     $oGetPriceWooCatalogo = (new cVendorIntegrationApiRequest())->fGetProductPriceStock($part_number, $sku_proveedor, $proveedor);
+                    if (empty($oGetPriceWooCatalogo->data) || !isset($oGetPriceWooCatalogo->data[0])) {
+                        continue;
+                    }
 
-                    $current_price = 99999999;
                     // Obtener el nuevo precio desde el webservice
                     $new_price = isset($oGetPriceWooCatalogo->data[0]->precio) ? $oGetPriceWooCatalogo->data[0]->precio : null;
+                    $moneda = isset($oGetPriceWooCatalogo->data[0]->moneda) ? $oGetPriceWooCatalogo->data[0]->moneda : 'USD';
                     
                     $price = 0;
                     if (!is_null($new_price) && $new_price > 0) {
@@ -189,32 +266,17 @@ class cVendorIntegrationCatalog {
                     $etiquetas = get_the_terms ( $product_id, 'product_tag' );
                     $etiquetas_precio = isset($etiquetas[0]) ? $etiquetas[0]->name : '';
 
-                    foreach ($oTagsDB  as $bd_res) {
+                    $price_config = self::resolvePriceConfigByTag($oTagsDB, $etiquetas_precio);
+                    $factor_cambio = self::resolveExchangeFactor($moneda, $price_config['dolar']);
 
-                        if ($bd_res['etiquetas_precio'] == $etiquetas_precio) {
-
-                            if (empty($oTagsDB)) {
-                                $dolar    = 1;
-                                $fmult = 1;
-                                $comision = 1;
-                            }else{
-                                $dolar    = floatval($bd_res['dolar']);
-                                $fmult = floatval($bd_res['fmult']);
-                                $comision = floatval($bd_res['comision']);
-                            }
-
-                            if ($price > 0) {
-                                $priceVenta = ceil($price * $dolar * $fmult * $comision);
-                            } else {
-                                $priceVenta = 99999999;
-                            }
-                            
-                            $product->set_regular_price($priceVenta);
-                            $product->save(); 
-              
-                        }
-    
+                    if ($price > 0) {
+                        $priceVenta = ceil($price * $factor_cambio * $price_config['fmult'] * $price_config['comision']);
+                    } else {
+                        $priceVenta = 99999999;
                     }
+
+                    $product->set_regular_price($priceVenta);
+                    $product->save();
 
                 } else {
                     continue;
@@ -262,10 +324,16 @@ class cVendorIntegrationCatalog {
                 $product_id = wc_get_product_id_by_sku($part_number);
                 $proveedor = get_post_meta($product_id, '_proveedor', true);
                 $sku_proveedor = get_post_meta($product_id, '_sku_proveedor', true);
+                if (empty($sku_proveedor)) {
+                    $sku_proveedor = $part_number;
+                }
 
                 if ($product_id && $proveedor) {
                     $product = wc_get_product($product_id);
                     $oGetStockWooCatalogo = (new cVendorIntegrationApiRequest())->fGetProductPriceStock($part_number, $sku_proveedor, $proveedor);
+                    if (empty($oGetStockWooCatalogo->data) || !isset($oGetStockWooCatalogo->data[0])) {
+                        continue;
+                    }
 
                     if (isset($oGetStockWooCatalogo->data[0]->stock) && $oGetStockWooCatalogo->data[0]->stock != 0) {
                         $stock = $oGetStockWooCatalogo->data[0]->stock;
@@ -316,11 +384,6 @@ class cVendorIntegrationCatalog {
                     'value'   => '',
                     'compare' => '!=',
                 ),
-                array(
-                    'key'     => '_sku_proveedor',
-                    'value'   => '',
-                    'compare' => '!=',
-                ),
             ),
         );
         
@@ -328,9 +391,11 @@ class cVendorIntegrationCatalog {
         $query = new WP_Query($args);
         $productos = $query->posts;
         $total_productos = $query->found_posts;
+        $procesados = count($productos);
         $actualizados = 0;
         $oTagsDB = (new cVendorIntegrationApiRequest())->fGetConfigValuesWooCatalogo();
         $new_price = 0; // Initialize
+        $price_config = array();
 
         foreach ($productos as $producto) {
             
@@ -342,6 +407,9 @@ class cVendorIntegrationCatalog {
                 $part_number = $product->get_sku();
                 $sku_proveedor = get_post_meta($producto->ID, '_sku_proveedor', true);
                 $proveedor = get_post_meta($producto->ID, '_proveedor', true);
+                if (empty($sku_proveedor)) {
+                    $sku_proveedor = $part_number;
+                }
                 
                 if ($sku_proveedor && $proveedor) {
                     $datos_api = (new cVendorIntegrationApiRequest())->obtener_datos_producto_api($part_number, $sku_proveedor, $proveedor);
@@ -368,8 +436,8 @@ class cVendorIntegrationCatalog {
                         
                         // Handle Price
                         if (isset($producto_api->precio)) {
-                            $current_price = 99999999;
                             $new_price = $producto_api->precio;
+                            $moneda = isset($producto_api->moneda) ? $producto_api->moneda : 'USD';
                             
                             $price = 0;
                             if (!is_null($new_price) && $new_price > 0) {
@@ -379,22 +447,17 @@ class cVendorIntegrationCatalog {
                             $etiquetas = get_the_terms( $producto->ID, 'product_tag' );
                             $etiquetas_precio = isset($etiquetas[0]) ? $etiquetas[0]->name : '';
 
-                            foreach ($oTagsDB  as $bd_res) {
-                                if ($bd_res['etiquetas_precio'] == $etiquetas_precio) {
-                                    $dolar    = floatval($bd_res['dolar']);
-                                    $fmult = floatval($bd_res['fmult']);
-                                    $comision = floatval($bd_res['comision']);
+                            $price_config = self::resolvePriceConfigByTag($oTagsDB, $etiquetas_precio);
+                            $factor_cambio = self::resolveExchangeFactor($moneda, $price_config['dolar']);
 
-                                    if ($price > 0) {
-                                        $priceVenta = ceil($price * $dolar * $fmult * $comision);
-                                    } else {
-                                        $priceVenta = 99999999;
-                                    }
-
-                                    $product->set_regular_price($priceVenta);
-                                    $product->save(); 
-                                }
+                            if ($price > 0) {
+                                $priceVenta = ceil($price * $factor_cambio * $price_config['fmult'] * $price_config['comision']);
+                            } else {
+                                $priceVenta = 99999999;
                             }
+
+                            $product->set_regular_price($priceVenta);
+                            $product->save();
                         }
                         
                         $actualizados++;
@@ -405,11 +468,12 @@ class cVendorIntegrationCatalog {
     
         wp_send_json_success(array(
             'total'       => $total_productos,
+            'procesados'  => $procesados,
             'actualizados' => $actualizados,
             'datos_api' => isset($datos_api) ? $datos_api : [],
             'datos_precio'=> $new_price,
             'etiqueta_producto' => isset($etiquetas_precio) ? $etiquetas_precio : '',
-            'etiqueta_bd'      => isset($bd_res['etiquetas_precio']) ? $bd_res['etiquetas_precio'] : '',
+            'etiqueta_bd'      => '',
         ));
     }
 

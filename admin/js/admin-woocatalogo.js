@@ -5,52 +5,87 @@
  */
 
 jQuery(document).ready(function () {
-  table = jQuery("#WooCatalogoTable").DataTable({
-    dom: "Bfrtip",
-    buttons: [
-      "copy",
-      "csv",
-      "excel",
-      "pdf",
-      "print",
-      "selected",
-      "selectedSingle",
-      "selectAll",
-      "selectNone",
-      "selectRows",
-      "selectColumns",
-      "selectCells",
-    ],
-    responsive: true,
-    ajax: {
-      url: "/wp-admin/admin-ajax.php?action=datatables_endpoint_vendor_integration",
-      dataSrc: "data",
-      data: function (d) {
-        d.nonce = Global.nonce;
-      },
-    },
-    select: {
-      style: "multi",
-    },
-    columns: [
-      { data: "woo" },
-      { data: "id" },
-      { data: "sku" },
-      { data: "mpn" },
-      { data: "nombre" },
-      { data: "precio" },
-      { data: "stock" },
-      { data: "categoria" },
-      { data: "subcategoria" },
-      { data: "proveedor" },
-      { data: "creado" },
-      { data: "actualizado" },
-      { data: "acciones" },
-    ],
-  });
+  var wooCatalogoTableSelector = "#viwWooCatalogoTable";
+  var productosTableFichaSelector = "#viwProductosTableFicha";
+  var table;
 
-  jQuery(document).ready(function ($) {
-    jQuery("#productosTableFicha").DataTable({
+  function hideBusyOverlay() {
+    jQuery(".loader-woocatalogo").hide();
+    jQuery(".popup-overlay").stop(true, true).fadeOut("fast");
+  }
+
+  function resetActionButton(selector, label) {
+    var $button = jQuery(selector);
+    $button.removeClass("disabled");
+    if ($button.is("input")) {
+      $button.val(label);
+      return;
+    }
+    $button.text(label);
+  }
+
+  if (jQuery(wooCatalogoTableSelector).length) {
+    var viwDatatablesUrl =
+      VIW_Global.url +
+      "?action=" +
+      VIW_Global.datatables_action +
+      "&nonce=" +
+      VIW_Global.nonce;
+
+    if (jQuery.fn.DataTable.isDataTable(wooCatalogoTableSelector)) {
+      table = jQuery(wooCatalogoTableSelector).DataTable();
+      if (table && table.ajax) {
+        table.ajax.url(viwDatatablesUrl).load();
+      }
+    } else {
+      table = jQuery(wooCatalogoTableSelector).DataTable({
+        dom: "Bfrtip",
+        buttons: [
+          "copy",
+          "csv",
+          "excel",
+          "pdf",
+          "print",
+          "selected",
+          "selectedSingle",
+          "selectAll",
+          "selectNone",
+          "selectRows",
+          "selectColumns",
+          "selectCells",
+        ],
+        responsive: true,
+        ajax: {
+          url: viwDatatablesUrl,
+          dataSrc: "data",
+        },
+        select: {
+          style: "multi",
+        },
+        columns: [
+          { data: "woo" },
+          { data: "id" },
+          { data: "sku" },
+          { data: "mpn" },
+          { data: "nombre" },
+          { data: "precio" },
+          { data: "stock" },
+          { data: "categoria" },
+          { data: "subcategoria" },
+          { data: "proveedor" },
+          { data: "creado" },
+          { data: "actualizado" },
+          { data: "acciones" },
+        ],
+      });
+    }
+  }
+
+  if (
+    jQuery(productosTableFichaSelector).length &&
+    !jQuery.fn.DataTable.isDataTable(productosTableFichaSelector)
+  ) {
+    jQuery(productosTableFichaSelector).DataTable({
       language: {
         url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json",
       },
@@ -71,42 +106,42 @@ jQuery(document).ready(function () {
       ],
       responsive: true,
     });
-  });
+  }
 
   //Descarga un en un excel todo el stock de los productos
-  jQuery("#fDownLoadCSVWooCatalogo").click(function (e) {
+  jQuery("#viwDownLoadCSVWooCatalogo").click(function (e) {
     e.preventDefault();
-    jQuery("#fDownLoadCSVWooCatalogo")
+    jQuery("#viwDownLoadCSVWooCatalogo")
       .html('<i class="fa fa-spinner fa-spin" style="font-size:20px"></i>')
       .addClass("disabled");
 
     // Realizar la solicitud AJAX para obtener el archivo CSV
     var url =
-      Global.url +
+      VIW_Global.url +
       "?action=" +
-      aDownLoadCSVWooCatalogo.action +
+      VIW_DownLoadCSVWooCatalogo.action +
       "&nonce=" +
-      Global.nonce;
+      VIW_Global.nonce;
 
     // Redirigir el navegador a la URL, lo que provocará la descarga del archivo
     window.location.href = url;
 
     // Reiniciar el botón
-    jQuery("#fDownLoadCSVWooCatalogo .fa-spin").remove();
-    jQuery("#fDownLoadCSVWooCatalogo").removeClass("disabled");
+    jQuery("#viwDownLoadCSVWooCatalogo .fa-spin").remove();
+    jQuery("#viwDownLoadCSVWooCatalogo").removeClass("disabled");
   });
 
-  jQuery("#fActualizarWooCatalogoJson").click(function (e) {
+  jQuery("#viwActualizarWooCatalogoJson").click(function (e) {
     e.preventDefault();
-    jQuery("#fActualizarWooCatalogoJson")
+    jQuery("#viwActualizarWooCatalogoJson")
       .html('<i class="fa fa-spinner fa-spin" style="font-size:20px"></i>')
       .addClass("disabled");
     jQuery.ajax({
       type: "POST",
-      url: Global.url,
+      url: VIW_Global.url,
       data: {
-        action: aUpdateJsonCatalog.action,
-        nonce: Global.nonce,
+        action: VIW_UpdateJsonCatalog.action,
+        nonce: VIW_Global.nonce,
       },
       beforeSend: function () {
         jQuery(".loader-woocatalogo").show();
@@ -114,28 +149,39 @@ jQuery(document).ready(function () {
         jQuery(".popup-overlay").height(jQuery(window).height());
       },
       success: function (data) {
-        jQuery("#fActualizarWooCatalogoJson .fa-spin").remove();
-        jQuery("#fActualizarWooCatalogoJson").removeClass("disabled");
+        resetActionButton(
+          "#viwActualizarWooCatalogoJson",
+          "Actualizar lista de productos",
+        );
         console.log(data);
         alert(data);
-        jQuery(".loader-woocatalogo").hide();
-        jQuery(".popup-overlay").fadeOut("slow");
         location.reload();
       },
+      error: function (xhr) {
+        resetActionButton(
+          "#viwActualizarWooCatalogoJson",
+          "Actualizar lista de productos",
+        );
+        console.log(xhr);
+        alert("Error al actualizar la lista de productos.");
+      },
+      complete: function () {
+        hideBusyOverlay();
+      },
     });
   });
 
-  jQuery("#fUpdateStockWooCatalogo").click(function (e) {
+  jQuery("#viwUpdateStockWooCatalogo").click(function (e) {
     e.preventDefault();
-    jQuery("#fUpdateStockWooCatalogo")
+    jQuery("#viwUpdateStockWooCatalogo")
       .html('<i class="fa fa-spinner fa-spin" style="font-size:20px"></i>')
       .addClass("disabled");
     jQuery.ajax({
       type: "POST",
-      url: Global.url,
+      url: VIW_Global.url,
       data: {
-        action: aUpdateStockWooCatalogo.action,
-        nonce: Global.nonce,
+        action: VIW_UpdateStockWooCatalogo.action,
+        nonce: VIW_Global.nonce,
       },
       beforeSend: function () {
         jQuery(".loader-woocatalogo").show();
@@ -143,28 +189,39 @@ jQuery(document).ready(function () {
         jQuery(".popup-overlay").height(jQuery(window).height());
       },
       success: function (data) {
-        jQuery("#fUpdateStockWooCatalogo .fa-spin").remove();
-        jQuery("#fUpdateStockWooCatalogo").removeClass("disabled");
+        resetActionButton(
+          "#viwUpdateStockWooCatalogo",
+          "Actualizar Stock en Woocommerce",
+        );
         console.log(data);
-        jQuery(".loader-woocatalogo").hide();
-        jQuery(".popup-overlay").fadeOut("slow");
         alert(data);
         //location.reload();
+      },
+      error: function (xhr) {
+        resetActionButton(
+          "#viwUpdateStockWooCatalogo",
+          "Actualizar Stock en Woocommerce",
+        );
+        console.log(xhr);
+        alert("Error al actualizar el stock.");
+      },
+      complete: function () {
+        hideBusyOverlay();
       },
     });
   });
 
-  jQuery("#fUpdatePrecioWooCatalogo").click(function (e) {
+  jQuery("#viwUpdatePrecioWooCatalogo").click(function (e) {
     e.preventDefault();
-    jQuery("#fUpdatePrecioWooCatalogo")
+    jQuery("#viwUpdatePrecioWooCatalogo")
       .html('<i class="fa fa-spinner fa-spin" style="font-size:20px"></i>')
       .addClass("disabled");
     jQuery.ajax({
       type: "POST",
-      url: Global.url,
+      url: VIW_Global.url,
       data: {
-        action: aUpdatPriceCatalogo.action,
-        nonce: Global.nonce,
+        action: VIW_UpdatPriceCatalogo.action,
+        nonce: VIW_Global.nonce,
       },
       beforeSend: function () {
         jQuery(".loader-woocatalogo").show();
@@ -172,27 +229,38 @@ jQuery(document).ready(function () {
         jQuery(".popup-overlay").height(jQuery(window).height());
       },
       success: function (data) {
-        jQuery("#fUpdatePrecioWooCatalogo .fa-spin").remove();
-        jQuery("#fUpdatePrecioWooCatalogo").removeClass("disabled");
+        resetActionButton(
+          "#viwUpdatePrecioWooCatalogo",
+          "Actualizar Precio en Woocommerce",
+        );
         console.log(data);
-        jQuery(".loader-woocatalogo").hide();
-        jQuery(".popup-overlay").fadeOut("slow");
         alert(data);
         //location.reload();
+      },
+      error: function (xhr) {
+        resetActionButton(
+          "#viwUpdatePrecioWooCatalogo",
+          "Actualizar Precio en Woocommerce",
+        );
+        console.log(xhr);
+        alert("Error al actualizar los precios.");
+      },
+      complete: function () {
+        hideBusyOverlay();
       },
     });
   });
 
-  jQuery("#fSaveConfigGlobWooCatalogo").submit(function (event) {
+  jQuery("#viwSaveConfigGlobWooCatalogo").submit(function (event) {
     event.preventDefault();
     console.log(jQuery(this).serializeArray());
     var dataNumberWooCatalogo = jQuery(this).serializeArray();
     jQuery.ajax({
       type: "POST",
-      url: Global.url,
+      url: VIW_Global.url,
       data: {
-        action: aSaveConfigGlobal.action,
-        nonce: Global.nonce,
+        action: VIW_SaveConfigGlobal.action,
+        nonce: VIW_Global.nonce,
         dataNumberWooCatalogo: dataNumberWooCatalogo,
       },
       beforeSend: function () {
@@ -204,6 +272,11 @@ jQuery(document).ready(function () {
         alert(data);
         location.reload();
       },
+      error: function (xhr) {
+        jQuery(".loader-woocatalogo").hide();
+        console.log(xhr);
+        alert("Error al guardar configuración global: " + xhr.status);
+      },
     });
   });
   jQuery("#fSaveLicenseWooCatalogo").submit(function (event) {
@@ -212,10 +285,10 @@ jQuery(document).ready(function () {
     var dataLicenseWooCatalogo = jQuery(this).serializeArray();
     jQuery.ajax({
       type: "POST",
-      url: Global.url,
+      url: VIW_Global.url,
       data: {
-        action: aSaveLicenseWooCatalogo.action,
-        nonce: Global.nonce,
+        action: VIW_SaveLicenseWooCatalogo.action,
+        nonce: VIW_Global.nonce,
         dataLicenseWooCatalogo: dataLicenseWooCatalogo,
       },
       beforeSend: function () {
@@ -227,17 +300,50 @@ jQuery(document).ready(function () {
         alert(data);
         location.reload();
       },
+      error: function (xhr) {
+        jQuery(".loader-woocatalogo").hide();
+        console.log(xhr);
+        alert("Error al guardar configuración de licencia: " + xhr.status);
+      },
     });
   });
 
-  jQuery("#fOpenConfogModalWooCatalogo").click(function (e) {
-    e.preventDefault();
-    jQuery("#popup").addClass("is-visible");
+  jQuery(document).on("click", ".viw-apply-config", function (event) {
+    event.preventDefault();
+
+    var $button = jQuery(this);
+    var ganancia = $button.attr("data-ganancia") || "";
+    var comision = $button.attr("data-comision") || "";
+    var dolar = $button.attr("data-dolar") || "";
+    var etiqueta = $button.attr("data-etiqueta") || "";
+
+    jQuery("#gan-woocatalogo").val(ganancia);
+    jQuery("#comision-woocatalogo").val(comision);
+    jQuery("#dolar-woocatalogo").val(dolar);
+
+    var $selectEtiqueta = jQuery("#categories-woocatalogo");
+    if ($selectEtiqueta.find("option[value='" + etiqueta + "']").length === 0 && etiqueta !== "") {
+      $selectEtiqueta.append(
+        jQuery("<option>", {
+          value: etiqueta,
+          text: etiqueta,
+        }),
+      );
+    }
+
+    $selectEtiqueta.val(etiqueta).trigger("change");
   });
 
-  jQuery("#fCloseConfogModalWooCatalogo").click(function (e) {
+  jQuery("#viwOpenConfigModalWooCatalogo").click(function (e) {
     e.preventDefault();
-    jQuery("#popup").removeClass("is-visible");
+    hideBusyOverlay();
+    jQuery("#viw-popup").addClass("is-visible");
+  });
+
+  jQuery("#viwCloseConfigModalWooCatalogo").click(function (e) {
+    e.preventDefault();
+    jQuery("#viw-popup").removeClass("is-visible");
+    hideBusyOverlay();
   });
 
   //popup de previsualizacion de producto//
@@ -248,6 +354,7 @@ jQuery(document).ready(function () {
     ) {
       event.preventDefault();
       jQuery(this).removeClass("is-visible");
+      hideBusyOverlay();
     }
   });
 
@@ -255,18 +362,19 @@ jQuery(document).ready(function () {
   jQuery(document).keyup(function (event) {
     if (event.which == "27") {
       jQuery(".cd-popup").removeClass("is-visible");
-      jQuery("#popup").removeClass("is-visible");
+      jQuery("#viw-popup").removeClass("is-visible");
+      hideBusyOverlay();
     }
   });
 });
 
-function fPriceShowWooCatalogo(part_number) {
+function viwPriceShowWooCatalogo(part_number) {
   jQuery.ajax({
     type: "POST",
-    url: Global.url,
+    url: VIW_Global.url,
     data: {
-      action: aPriceShowWooCatalogo.action,
-      nonce: Global.nonce,
+      action: VIW_PriceShowWooCatalogo.action,
+      nonce: VIW_Global.nonce,
       part_number: part_number,
     },
     beforeSend: function () {
@@ -333,13 +441,17 @@ function fPriceShowWooCatalogo(part_number) {
   });
 }
 
-function fStockShowWooCatalogo(part_number) {
+function fPriceShowWooCatalogo(part_number) {
+  return viwPriceShowWooCatalogo(part_number);
+}
+
+function viwStockShowWooCatalogo(part_number) {
   jQuery.ajax({
     type: "POST",
-    url: Global.url,
+    url: VIW_Global.url,
     data: {
-      action: aStockShowWooCatalogo.action,
-      nonce: Global.nonce,
+      action: VIW_StockShowWooCatalogo.action,
+      nonce: VIW_Global.nonce,
       part_number: part_number,
     },
     beforeSend: function () {
@@ -406,14 +518,18 @@ function fStockShowWooCatalogo(part_number) {
   });
 }
 
+function fStockShowWooCatalogo(part_number) {
+  return viwStockShowWooCatalogo(part_number);
+}
+
 /////Borrar configuracion//////
-function fDeleteConfigWooCatalogo(idreg) {
+function viwDeleteConfigWooCatalogo(idreg) {
   jQuery.ajax({
     type: "POST",
-    url: Global.url,
+    url: VIW_Global.url,
     data: {
-      action: aDeleteConfigGlobal.action,
-      nonce: Global.nonce,
+      action: VIW_DeleteConfigGlobal.action,
+      nonce: VIW_Global.nonce,
       idreg: idreg,
     },
     beforeSend: function () {
@@ -431,14 +547,18 @@ function fDeleteConfigWooCatalogo(idreg) {
   });
 }
 
+function fDeleteConfigWooCatalogo(idreg) {
+  return viwDeleteConfigWooCatalogo(idreg);
+}
+
 /////Insertar productos//////
-function fInsertProductWooCatalogo(part_number, proveedor) {
+function viwInsertProductWooCatalogo(part_number, proveedor) {
   jQuery.ajax({
     type: "POST",
-    url: Global.url,
+    url: VIW_Global.url,
     data: {
-      action: aInsertProductoWooCatalogo.action,
-      nonce: Global.nonce,
+      action: VIW_InsertProductoWooCatalogo.action,
+      nonce: VIW_Global.nonce,
       part_number: part_number,
       proveedor: proveedor,
     },
@@ -457,14 +577,46 @@ function fInsertProductWooCatalogo(part_number, proveedor) {
   });
 }
 
+function fInsertProductWooCatalogo(part_number, proveedor) {
+  return viwInsertProductWooCatalogo(part_number, proveedor);
+}
+
 /////Borrar productos//////
-function fDeleteProductWooCatalogo(part_number) {
+function viwDeleteProductWooCatalogo(part_number) {
   jQuery.ajax({
     type: "POST",
-    url: Global.url,
+    url: VIW_Global.url,
     data: {
-      action: aDeleteProductoWooCatalogo.action,
-      nonce: Global.nonce,
+      action: VIW_DeleteProductoWooCatalogo.action,
+      nonce: VIW_Global.nonce,
+      part_number: part_number,
+    },
+    beforeSend: function () {
+      jQuery(".loader-woocatalogo").show();
+      jQuery(".popup-overlay").fadeIn("slow");
+      jQuery(".popup-overlay").height(jQuery(window).height());
+    },
+    success: function (data) {
+      jQuery(".loader-woocatalogo").hide();
+      jQuery(".popup-overlay").fadeOut("slow");
+      console.log(data);
+      alert(data);
+      location.reload();
+    },
+  });
+}
+
+function fDeleteProductWooCatalogo(part_number) {
+  return viwDeleteProductWooCatalogo(part_number);
+}
+
+function viwUpdateAtrrWooCatalogo(part_number) {
+  jQuery.ajax({
+    type: "POST",
+    url: VIW_Global.url,
+    data: {
+      action: VIW_InsertAttrWooCatalogo.action,
+      nonce: VIW_Global.nonce,
       part_number: part_number,
     },
     beforeSend: function () {
@@ -483,36 +635,16 @@ function fDeleteProductWooCatalogo(part_number) {
 }
 
 function fUpdateAtrrWooCatalogo(part_number) {
-  jQuery.ajax({
-    type: "POST",
-    url: Global.url,
-    data: {
-      action: aInsertAttrWooCatalogo.action,
-      nonce: Global.nonce,
-      part_number: part_number,
-    },
-    beforeSend: function () {
-      jQuery(".loader-woocatalogo").show();
-      jQuery(".popup-overlay").fadeIn("slow");
-      jQuery(".popup-overlay").height(jQuery(window).height());
-    },
-    success: function (data) {
-      jQuery(".loader-woocatalogo").hide();
-      jQuery(".popup-overlay").fadeOut("slow");
-      console.log(data);
-      alert(data);
-      location.reload();
-    },
-  });
+  return viwUpdateAtrrWooCatalogo(part_number);
 }
 
-function fPreviewProductWooCatalogo(part_number) {
+function viwPreviewProductWooCatalogo(part_number) {
   jQuery.ajax({
     type: "POST",
-    url: Global.url,
+    url: VIW_Global.url,
     data: {
-      action: aPreviewProductWooCatalogo.action,
-      nonce: Global.nonce,
+      action: VIW_PreviewProductWooCatalogo.action,
+      nonce: VIW_Global.nonce,
       part_number: part_number,
     },
     beforeSend: function () {
@@ -531,4 +663,8 @@ function fPreviewProductWooCatalogo(part_number) {
       }
     },
   });
+}
+
+function fPreviewProductWooCatalogo(part_number) {
+  return viwPreviewProductWooCatalogo(part_number);
 }

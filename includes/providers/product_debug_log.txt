@@ -1,31 +1,29 @@
 Array
 (
-    [name] => LV ThinkSmart Core Full Room Kit  Teams
-    [sku] => 12VS0003CS
-    [description] => LV ThinkSmart Core Full Room Kit Teams
-    [short_description] => 
-    [price] => 3700
-    [tax] => 
+    [name] => Lexmark X950X2YG toner cartridge 1 pc(s) Original Yellow
+    [sku] => X950X2YG
+    [description] => <b>Extra High Yield</b><br>Print with confidence. Top yields mean you're saving big by operating at the best efficiency, for both your budget and the environment.<br><br><b>Technology</b><br>Outstanding results page after page, year after year. Superior Lexmark design means precision pairing between printer and cartridge for value, quality and environmental responsibility you can count on.<br><br><b>Lexmark Cartridge Collection Program</b><br>Going green has never been easier. Recycle all your used Lexmark supplies by letting us take care of the details. It’s simple, smart and always free.<br><br><b>Return</b><br>for Recycling<br>Lexmark offers customers a broad choice of laser toner cartridges and recycling options including easy return to Lexmark. For superior results always use genuine Lexmark supplies.
+    [short_description] => Lexmark X950X2YG, 24000 pages, Yellow, 1 pc(s)
+    [price] => 562.51
+    [tax] => 19
     [currency] => USD
-    [inventory] => 9
+    [inventory] => 1
     [transit] => 0
     [category] => Array
         (
-            [0] => communications-conference-equipment
+            [0] => printing-supplies
         )
 
     [subcategory] => Array
         (
-            [0] => Conference &amp; communications equipment
-            [1] => Video Conferencing Systems
+            [0] => Toner Cartridges
         )
 
     [brand] => Array
         (
-            [0] => Lenovo
+            [0] => Lexmark
         )
 
-    [features] => <p>0</p>
-
-    [image] => https://www.nexsysla.com/cl/wp-content/uploads/sites/10/2025/05/12VS0003CS.jpg
+    [features] => <ul><li><strong>Compatibility:</strong> X950de, X952de, X954de</li><li><strong>Quantity per pack:</strong> 1 pc(s)</li><li><strong>Colour toner page yield:</strong> 24000 pages</li><li><strong>Type:</strong> Original</li><li><strong>Printing colours:</strong> Yellow</li><li><strong>Product colour:</strong> Black</li><li><strong>Country of origin:</strong> Japan</li><li><strong>Package dimensions (WxDxH):</strong> 73.5 x 456 x 70.5 mm</li><li><strong>Package dimensions (W x D x H):</strong> 73.4 x 455.9 x 70.6 mm (2.89 x 17.9 x 2.78&quot;)</li><li><strong>Package weight:</strong> 600 g</li><li><strong>Print technology:</strong> Laser printing</li><li><strong>Harmonized System (HS) code:</strong> 84439990</li><li><strong>Products per pallet:</strong> 288 pc(s)</li></ul>
+    [image] => https://www.nexsysla.com/cl/wp-content/uploads/sites/10/2025/06/9358898-5804.jpg
 )

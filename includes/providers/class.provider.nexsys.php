@@ -234,7 +234,8 @@ class VendorIntegrationNexsysProvider extends VendorIntegrationProviderAbstract
                     if (strcasecmp($api_sku, $searchKey) === 0 || strcasecmp($api_mpn, $searchKey) === 0) {
                         return [
                             'price' => isset($item['price']) ? $item['price'] : 0,
-                            'stock' => isset($item['stock_quantity']) ? $item['stock_quantity'] : 0
+                            'stock' => isset($item['stock_quantity']) ? $item['stock_quantity'] : 0,
+                            'currency' => isset($item['currency']) ? $item['currency'] : 'USD'
                         ];
                     }
                 }
@@ -245,13 +246,14 @@ class VendorIntegrationNexsysProvider extends VendorIntegrationProviderAbstract
                 if (strcasecmp($api_sku, $searchKey) === 0 || strcasecmp($api_mpn, $searchKey) === 0) {
                     return [
                         'price' => isset($data['price']) ? $data['price'] : 0,
-                        'stock' => isset($data['stock_quantity']) ? $data['stock_quantity'] : 0
+                        'stock' => isset($data['stock_quantity']) ? $data['stock_quantity'] : 0,
+                        'currency' => isset($data['currency']) ? $data['currency'] : 'USD'
                     ];
                 }
             }
         }
 
-        return ['price' => 0, 'stock' => 0];
+        return ['price' => 0, 'stock' => 0, 'currency' => 'USD'];
     }
 
     public function getProductDetails($part_number)
