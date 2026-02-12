@@ -312,6 +312,16 @@ class cProductWooCatalogo {
                 cProductWooCatalogo::asignarImagenesProducto($product->get_id(), $aImagenesData, $aGalleryData);
             }
         }
+        
+        // Handle root-level image (fallback or primary if no complex features)
+        if (!empty($producto->imagen)) {
+             error_log("Debug WooCatalogo: Found root image for product ID " . $product->get_id() . ": " . $producto->imagen);
+             $image_id = cProductWooCatalogo::descargarSubirImagen($producto->imagen, $product->get_id());
+             if ($image_id) {
+                 set_post_thumbnail($product->get_id(), $image_id);
+                 error_log("Debug WooCatalogo: Set post thumbnail ID: " . $image_id);
+             }
+        }
     }
 
     public static function asignarImagenesProducto($product_new_id, $aImagenesData, $aGalleryData) {

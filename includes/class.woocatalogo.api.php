@@ -178,6 +178,11 @@ class cWooCatalogoApiRequest {
                      $obj->caracteristicas = isset($obj->attributes) ? $obj->attributes : [];
                 }
 
+                // Map 'image' to 'imagen' for consistency
+                if (!isset($obj->imagen)) {
+                    $obj->imagen = isset($obj->image) ? $obj->image : '';
+                }
+
                 $items[] = $obj;
             }
             
