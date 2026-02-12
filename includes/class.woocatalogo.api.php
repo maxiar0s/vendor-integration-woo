@@ -11,17 +11,17 @@ if (!defined('ABSPATH'))
  */
 
 
-class cWooCatalogoApiRequest
+class cVendorIntegrationApiRequest
 {
 
     /**
      * Get the Nexsys provider instance.
      * 
-     * @return WooCatalogoNexsysProvider
+     * @return VendorIntegrationNexsysProvider
      */
     public static function get_provider_instance()
     {
-        return new WooCatalogoNexsysProvider();
+        return new VendorIntegrationNexsysProvider();
     }
 
     /**
@@ -213,7 +213,7 @@ class cWooCatalogoApiRequest
     public static function fGetConfigValuesWooCatalogo()
     {
         global $wpdb;
-        $query = "SELECT * FROM {$wpdb->prefix}woocatalogo";
+        $query = "SELECT * FROM {$wpdb->prefix}vendor_integration";
         $result = $wpdb->get_results($query, ARRAY_A);
         if (empty($result)) {
             $result = array();

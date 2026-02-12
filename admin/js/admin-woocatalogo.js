@@ -23,7 +23,7 @@ jQuery(document).ready(function () {
     ],
     responsive: true,
     ajax: {
-      url: "/wp-admin/admin-ajax.php?action=datatables_endpoint_woocatalogo",
+      url: "/wp-admin/admin-ajax.php?action=datatables_endpoint_vendor_integration",
       dataSrc: "data",
       data: function (d) {
         d.nonce = Global.nonce;

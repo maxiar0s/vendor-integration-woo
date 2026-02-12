@@ -12,11 +12,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract
+class VendorIntegrationNexsysProvider extends VendorIntegrationProviderAbstract
 {
 
     const BASE_URL_TEMPLATE = "https://www.nexsysla.com/:country/wp-json/resellers/v1/";
-    const TRANSIENT_TOKEN_KEY = 'woocatalogo_nexsys_token';
+    const TRANSIENT_TOKEN_KEY = 'vendor_integration_nexsys_token';
     const TOKEN_EXPIRATION = DAY_IN_SECONDS; // 24 hours
 
     public function getProviderSlug()
@@ -27,9 +27,9 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract
     protected function loadSettings($settings = [])
     {
         if (empty($settings)) {
-            $this->user_id = get_option('woocatalogo_nexsys_email', '');
-            $this->password = get_option('woocatalogo_nexsys_password', '');
-            $this->country = get_option('woocatalogo_nexsys_country', 'cl');
+            $this->user_id = get_option('vendor_integration_nexsys_email', get_option('woocatalogo_nexsys_email', ''));
+            $this->password = get_option('vendor_integration_nexsys_password', get_option('woocatalogo_nexsys_password', ''));
+            $this->country = get_option('vendor_integration_nexsys_country', get_option('woocatalogo_nexsys_country', 'cl'));
         } else {
             parent::loadSettings($settings);
         }
@@ -109,7 +109,7 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract
 
             // 1. Delete expired token
             delete_transient(self::TRANSIENT_TOKEN_KEY);
-            delete_transient('woocatalogo_nexsys_auth_error');
+            delete_transient('vendor_integration_nexsys_auth_error');
 
             // 2. Re-authenticate
             if ($this->login()) {
@@ -125,7 +125,7 @@ class WooCatalogoNexsysProvider extends WooCatalogoProviderAbstract
                 return parent::remoteRequest($url, $method, $headers, $body);
             } else {
                 $this->log("Re-authentication failed. Please check credentials.");
-                set_transient('woocatalogo_nexsys_auth_error', 'Error de autenticación Nexsys. Por favor, revise sus credenciales.', DAY_IN_SECONDS);
+                set_transient('vendor_integration_nexsys_auth_error', 'Error de autenticación Nexsys. Por favor, revise sus credenciales.', DAY_IN_SECONDS);
             }
         }
 

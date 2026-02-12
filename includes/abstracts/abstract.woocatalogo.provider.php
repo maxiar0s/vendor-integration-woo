@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-abstract class WooCatalogoProviderAbstract implements WooCatalogoProviderInterface {
+abstract class VendorIntegrationProviderAbstract implements VendorIntegrationProviderInterface {
 
     protected $api_key;
     protected $user_id;
@@ -36,8 +36,8 @@ abstract class WooCatalogoProviderAbstract implements WooCatalogoProviderInterfa
 
     /* Helper function to standardize log messages */
     protected function log($message) {
-        if (defined('WOOCATALOGO_DEBUG_MODE') && WOOCATALOGO_DEBUG_MODE) {
-            error_log("[WooCatalogo - {$this->slug}] " . print_r($message, true));
+        if (defined('VENDOR_INTEGRATION_DEBUG_MODE') && VENDOR_INTEGRATION_DEBUG_MODE) {
+            error_log("[Vendor Integration - {$this->slug}] " . print_r($message, true));
         }
     }
 

@@ -16,19 +16,20 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 global $wpdb;
 
 // 1. Drop custom table
-$table_name = $wpdb->prefix . 'woocatalogo';
+$table_name = $wpdb->prefix . 'vendor_integration';
 $wpdb->query("DROP TABLE IF EXISTS {$table_name}");
 
 // 2. Delete plugin options
-delete_option('woocatalogo_nexsys_email');
-delete_option('woocatalogo_nexsys_password');
-delete_option('woocatalogo_nexsys_country');
+delete_option('vendor_integration_nexsys_email');
+delete_option('vendor_integration_nexsys_password');
+delete_option('vendor_integration_nexsys_country');
 
 // 3. Delete transients (and legacy option key)
-delete_option('woocatalogo_nexsys_token');
-delete_transient('woocatalogo_nexsys_token');
+delete_option('vendor_integration_nexsys_token');
+delete_transient('vendor_integration_nexsys_token');
+delete_transient('vendor_integration_nexsys_auth_error');
 
 // 4. Clear scheduled cron hooks
-wp_clear_scheduled_hook('CronActualizarCatalogoStock');
-wp_clear_scheduled_hook('CronActualizarCatalogoPrice');
-wp_clear_scheduled_hook('CronActualizarCatalogo');
+wp_clear_scheduled_hook('vendor_integration_cron_update_stock');
+wp_clear_scheduled_hook('vendor_integration_cron_update_price');
+wp_clear_scheduled_hook('vendor_integration_cron_update_catalog');

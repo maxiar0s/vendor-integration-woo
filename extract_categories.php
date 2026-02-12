@@ -4,8 +4,8 @@
 // This script assumes you have WP loaded or run with wp-cli
 
 $products = [];
-if (class_exists('WooCatalogoNexsysProvider')) {
-    $provider = new WooCatalogoNexsysProvider();
+if (class_exists('VendorIntegrationNexsysProvider')) {
+    $provider = new VendorIntegrationNexsysProvider();
     $page = 1;
     $max_pages = 5; // Limit to 5 pages for quick check, increase if needed
 
@@ -21,7 +21,7 @@ if (class_exists('WooCatalogoNexsysProvider')) {
         $page++;
     } while ($page <= $max_pages);
 } else {
-    echo "This script must be run within a WordPress environment where WooCatalogoNexsysProvider is available or included.\n";
+    echo "This script must be run within a WordPress environment where VendorIntegrationNexsysProvider is available or included.\n";
     exit;
 }
 

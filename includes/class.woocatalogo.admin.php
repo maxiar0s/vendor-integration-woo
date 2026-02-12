@@ -10,10 +10,10 @@ if (!defined('ABSPATH')) exit;
  */
 
 
-class cWooCatalogoAdmin {
+class cVendorIntegrationAdmin {
 
     public static function fAdminNoticesWooCatalogo() {
-        $error = get_transient('woocatalogo_nexsys_auth_error');
+        $error = get_transient('vendor_integration_nexsys_auth_error');
         if ($error) {
             ?>
             <div class="notice notice-error is-dismissible">
@@ -21,7 +21,7 @@ class cWooCatalogoAdmin {
             </div>
             <?php
             // Optionally delete after showing, or keep until success
-            // delete_transient('woocatalogo_nexsys_auth_error'); 
+            // delete_transient('vendor_integration_nexsys_auth_error'); 
         }
     }
 
@@ -32,41 +32,41 @@ class cWooCatalogoAdmin {
             'Vendor Integration Woo', // Título de la página en el menú
             'Vendor Integration', // Texto que se mostrará en el menú
             'manage_options', // Capacidad requerida para ver la página (en este caso, usuarios con 'manage_options' pueden verla)
-            'woocatalogo_options', // Identificador único de la página
-            ['cWooCatalogoAdmin', 'fMenuWooCatalogo'], // Callback para mostrar el contenido de la página
+            'vendor_integration_options', // Identificador único de la página
+            ['cVendorIntegrationAdmin', 'fMenuWooCatalogo'], // Callback para mostrar el contenido de la página
             'dashicons-money-alt', // Icono que se mostrará junto al menú (en este caso, un icono de dinero)
             '65' // Posición en la que se mostrará el menú dentro del menú de WordPress
         );
-        add_action('admin_notices', ['cWooCatalogoAdmin', 'fAdminNoticesWooCatalogo']);
+        add_action('admin_notices', ['cVendorIntegrationAdmin', 'fAdminNoticesWooCatalogo']);
     }
     
     public static function fCreateSubMenuWooCatalogo() {
         // Agregar el submenú a la página de ajustes de WordPress
         add_submenu_page(
-                'woocatalogo_options', // Página padre (el mismo que usaste en add_menu_page)
+                'vendor_integration_options', // Página padre (el mismo que usaste en add_menu_page)
                 'Opciones Vendor Integration', // Título del submenú
                 'Opciones', // Texto en el menú
                 'manage_options', // Capacidad requerida para ver el submenú (puedes ajustarlo según tus necesidades)
-                'woocatalogo_submenu', // Identificador único del submenú
-                ['cWooCatalogoAdmin', 'fSubmenuWooCatalogo'] // Función que muestra el contenido del submenú
+                'vendor_integration_submenu', // Identificador único del submenú
+                ['cVendorIntegrationAdmin', 'fSubmenuWooCatalogo'] // Función que muestra el contenido del submenú
             );
         // Agregar el submenú a la página de ajustes de WordPress
         add_submenu_page(
-            'woocatalogo_options', // Página padre (el mismo que usaste en add_menu_page)
+            'vendor_integration_options', // Página padre (el mismo que usaste en add_menu_page)
             'Mis Fichas Tecnicas', // Título del submenú
             'Fichas Tecnicas', // Texto en el menú
             'manage_options', // Capacidad requerida para ver el submenú (puedes ajustarlo según tus necesidades)
-            'woocatalogo_submenuficha', // Identificador único del submenú
-            ['cWooCatalogoAdmin', 'fSubmenuFicha'] // Función que muestra el contenido del submenú
+            'vendor_integration_submenuficha', // Identificador único del submenú
+            ['cVendorIntegrationAdmin', 'fSubmenuFicha'] // Función que muestra el contenido del submenú
         );
         // Agregar el submenú a la página de ajustes de WordPress
         add_submenu_page(
-            'woocatalogo_options', // Página padre (el mismo que usaste en add_menu_page)
+            'vendor_integration_options', // Página padre (el mismo que usaste en add_menu_page)
             'Sincronizar productos', // Título del submenú
             'Sincronizar', // Texto en el menú
             'manage_options', // Capacidad requerida para ver el submenú (puedes ajustarlo según tus necesidades)
-            'woocatalogo_updateproducts', // Identificador único del submenú
-            ['cWooCatalogoAdmin', 'fSubmenuProduct'] // Función que muestra el contenido del submenú
+            'vendor_integration_updateproducts', // Identificador único del submenú
+            ['cVendorIntegrationAdmin', 'fSubmenuProduct'] // Función que muestra el contenido del submenú
         );
 
     
@@ -99,30 +99,30 @@ class cWooCatalogoAdmin {
                     <tbody>
                         <tr>
                             <th scope="row">
-                                <label for="woocatalogo_nexsys_email"><?php _e('Email Nexsys', 'vendor-integration-woo')?></label>
+                                <label for="vendor_integration_nexsys_email"><?php _e('Email Nexsys', 'vendor-integration-woo')?></label>
                             </th>
                             <td>
-                                <input type="email" class="regular-text ltr" name="woocatalogo_nexsys_email" id="woocatalogo_nexsys_email" placeholder="email@nexsys.com" value="<?php echo esc_attr( get_option('woocatalogo_nexsys_email') ); ?>">
+                                <input type="email" class="regular-text ltr" name="vendor_integration_nexsys_email" id="vendor_integration_nexsys_email" placeholder="email@nexsys.com" value="<?php echo esc_attr( get_option('vendor_integration_nexsys_email', get_option('woocatalogo_nexsys_email', '')) ); ?>">
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="woocatalogo_nexsys_password"><?php _e('Password Nexsys', 'vendor-integration-woo')?></label>
+                                <label for="vendor_integration_nexsys_password"><?php _e('Password Nexsys', 'vendor-integration-woo')?></label>
                             </th>
                             <td>
-                                <input type="password" class="regular-text ltr" name="woocatalogo_nexsys_password" id="woocatalogo_nexsys_password" placeholder="********" value="<?php echo esc_attr( get_option('woocatalogo_nexsys_password') ); ?>">
+                                <input type="password" class="regular-text ltr" name="vendor_integration_nexsys_password" id="vendor_integration_nexsys_password" placeholder="********" value="<?php echo esc_attr( get_option('vendor_integration_nexsys_password', get_option('woocatalogo_nexsys_password', '')) ); ?>">
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="woocatalogo_nexsys_country"><?php _e('País (Código)', 'vendor-integration-woo')?></label>
+                                <label for="vendor_integration_nexsys_country"><?php _e('País (Código)', 'vendor-integration-woo')?></label>
                             </th>
                             <td>
-                                <select name="woocatalogo_nexsys_country" id="woocatalogo_nexsys_country">
-                                    <option value="cl" <?php selected( get_option('woocatalogo_nexsys_country', 'cl'), 'cl' ); ?>>Chile (cl)</option>
-                                    <option value="co" <?php selected( get_option('woocatalogo_nexsys_country'), 'co' ); ?>>Colombia (co)</option>
-                                    <option value="pe" <?php selected( get_option('woocatalogo_nexsys_country'), 'pe' ); ?>>Perú (pe)</option>
-                                    <option value="mx" <?php selected( get_option('woocatalogo_nexsys_country'), 'mx' ); ?>>México (mx)</option>
+                                <select name="vendor_integration_nexsys_country" id="vendor_integration_nexsys_country">
+                                    <option value="cl" <?php selected( get_option('vendor_integration_nexsys_country', get_option('woocatalogo_nexsys_country', 'cl')), 'cl' ); ?>>Chile (cl)</option>
+                                    <option value="co" <?php selected( get_option('vendor_integration_nexsys_country', get_option('woocatalogo_nexsys_country', 'cl')), 'co' ); ?>>Colombia (co)</option>
+                                    <option value="pe" <?php selected( get_option('vendor_integration_nexsys_country', get_option('woocatalogo_nexsys_country', 'cl')), 'pe' ); ?>>Perú (pe)</option>
+                                    <option value="mx" <?php selected( get_option('vendor_integration_nexsys_country', get_option('woocatalogo_nexsys_country', 'cl')), 'mx' ); ?>>México (mx)</option>
                                 </select>
                             </td>
                         </tr>
@@ -146,7 +146,7 @@ class cWooCatalogoAdmin {
         if ( !current_user_can( 'manage_options' ) )  {
             wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
         }
-        $config_woocatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+        $config_woocatalogo = (new cVendorIntegrationApiRequest())->fGetConfigValuesWooCatalogo();
         if ($config_woocatalogo) {
             $dolar = $config_woocatalogo[0]['dolar'];
             $comision = $config_woocatalogo[0]['comision'];
@@ -290,7 +290,7 @@ class cWooCatalogoAdmin {
                                     </thead>
                                     <?php
                                     
-                                    $aOptionsWooCatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+                                    $aOptionsWooCatalogo = (new cVendorIntegrationApiRequest())->fGetConfigValuesWooCatalogo();
 
                                     foreach ($aOptionsWooCatalogo as $option_woocatalogo) {
 
@@ -441,7 +441,7 @@ class cWooCatalogoAdmin {
     public static function fSaveConfigGlobalWooCatalogo($nonce) {
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -455,7 +455,7 @@ class cWooCatalogoAdmin {
         $sDolarWooCatalogo      = isset($aDataNumberWooCatalogo[2]['value']) ? floatval($aDataNumberWooCatalogo[2]['value']) : 0;
         $aTagWooCatalogo        = isset($aDataNumberWooCatalogo[3]['value']) ? sanitize_text_field($aDataNumberWooCatalogo[3]['value']) : '';
         $dTimeWooCatalogo       = current_time('mysql');
-        $sTableWooCatalogo      = $wpdb->prefix.'woocatalogo';
+        $sTableWooCatalogo      = $wpdb->prefix.'vendor_integration';
         $qWooCatalogo           = "SELECT * FROM $sTableWooCatalogo";
         $sResWooCatalogo        = $wpdb->get_results($qWooCatalogo, ARRAY_A);
         $aResTagWooCatalogo        = array_search($aTagWooCatalogo, array_column($sResWooCatalogo, 'etiquetas_precio'));
@@ -486,7 +486,7 @@ class cWooCatalogoAdmin {
     public static function fDeleteConfigGlobalWooCatalogo($nonce) {
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -497,7 +497,7 @@ class cWooCatalogoAdmin {
         if (!empty($idreg)) {
             global $wpdb;
             $wpdb->delete(
-                $wpdb->prefix . 'woocatalogo',
+                $wpdb->prefix . 'vendor_integration',
                 ['id' => $idreg],
                 ['%d']
             );
@@ -511,7 +511,7 @@ class cWooCatalogoAdmin {
     public static function fSaveLicenseWooCatalogo($nonce){
 
         $nonce = sanitize_text_field( $_POST['nonce'] );
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -525,18 +525,18 @@ class cWooCatalogoAdmin {
         $nexsys_country = 'cl';
 
         foreach ($aDataLicenseWooCatalogo as $field) {
-            if ($field['name'] === 'woocatalogo_nexsys_email') $nexsys_email = $field['value'];
-            if ($field['name'] === 'woocatalogo_nexsys_password') $nexsys_password = $field['value'];
-            if ($field['name'] === 'woocatalogo_nexsys_country') $nexsys_country = $field['value'];
+            if ($field['name'] === 'vendor_integration_nexsys_email') $nexsys_email = $field['value'];
+            if ($field['name'] === 'vendor_integration_nexsys_password') $nexsys_password = $field['value'];
+            if ($field['name'] === 'vendor_integration_nexsys_country') $nexsys_country = $field['value'];
         }
 
-        if (!empty($nexsys_email)) update_option('woocatalogo_nexsys_email', sanitize_email($nexsys_email));
-        if (!empty($nexsys_password)) update_option('woocatalogo_nexsys_password', sanitize_text_field($nexsys_password));
-        if (!empty($nexsys_country)) update_option('woocatalogo_nexsys_country', sanitize_text_field($nexsys_country));
+        if (!empty($nexsys_email)) update_option('vendor_integration_nexsys_email', sanitize_email($nexsys_email));
+        if (!empty($nexsys_password)) update_option('vendor_integration_nexsys_password', sanitize_text_field($nexsys_password));
+        if (!empty($nexsys_country)) update_option('vendor_integration_nexsys_country', sanitize_text_field($nexsys_country));
 
         // Delete token to force re-authentication
-        delete_transient('woocatalogo_nexsys_token');
-        delete_transient('woocatalogo_nexsys_auth_error');
+        delete_transient('vendor_integration_nexsys_token');
+        delete_transient('vendor_integration_nexsys_auth_error');
 
         echo "Configuración Nexsys guardada";
         wp_die();
@@ -546,7 +546,7 @@ class cWooCatalogoAdmin {
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        $table_name = $wpdb->prefix . 'woocatalogo';
+        $table_name = $wpdb->prefix . 'vendor_integration';
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE {$table_name} (
@@ -586,7 +586,7 @@ class cWooCatalogoAdmin {
 
     public static function fAjaxEndpointWooCatalogo(){
         $nonce = isset($_REQUEST['nonce']) ? sanitize_text_field($_REQUEST['nonce']) : '';
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
              wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
 
@@ -594,7 +594,7 @@ class cWooCatalogoAdmin {
             wp_die(__('Unauthorized access.', 'vendor-integration-woo'), 403);
         }
 
-        $json_file = WOOCATALOGO__PLUGIN_DIR . 'admin/dataWooCatalogo/dataWooCatalogo.json';
+        $json_file = VENDOR_INTEGRATION_PLUGIN_DIR . 'admin/dataWooCatalogo/dataWooCatalogo.json';
         if (file_exists($json_file)) {
             header('Content-Type: application/json');
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file

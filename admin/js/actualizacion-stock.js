@@ -18,7 +18,7 @@ jQuery(document).ready(function($) {
                 url: datosActualizacion.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'procesar_lote_productos',
+                    action: 'procesar_lote_productos_vendor_integration',
                     offset: offset,
                     tamano_lote: tamanoLote,
                     nonce: datosActualizacion.nonce

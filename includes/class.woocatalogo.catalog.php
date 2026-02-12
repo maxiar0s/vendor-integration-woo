@@ -9,14 +9,14 @@ if (!defined('ABSPATH')) exit;
  * @subpackage  base/include
  */
 
-class cCatalogWooCatalog {
+class cVendorIntegrationCatalog {
 
 
     public static function fGetCatalogCSV($nonce) {
 
         // Verificar nonce para seguridad desde $_GET
         $nonce = isset($_GET['nonce']) ? sanitize_text_field($_GET['nonce']) : '';
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -24,7 +24,7 @@ class cCatalogWooCatalog {
         }
     
         // Delegate CSV generation and download to the API class
-        (new cWooCatalogoApiRequest())->fGenerateCatalogCSV();
+        (new cVendorIntegrationApiRequest())->fGenerateCatalogCSV();
     }
 
 
@@ -32,7 +32,7 @@ class cCatalogWooCatalog {
 
         if (!$is_cron) {
             $nonce = sanitize_text_field( $_POST['nonce'] );
-            if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
                 wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
             }
             if (!current_user_can('manage_options')) {
@@ -41,11 +41,11 @@ class cCatalogWooCatalog {
         }
 
         $awooArray = [];
-        $oCatalogWooCatalogo = (new cWooCatalogoApiRequest())->fGetCatalogWooCatalogo();
+        $oCatalogWooCatalogo = (new cVendorIntegrationApiRequest())->fGetCatalogWooCatalogo();
 
 
         // Get global settings
-        $config_woocatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+        $config_woocatalogo = (new cVendorIntegrationApiRequest())->fGetConfigValuesWooCatalogo();
         $dolar = 1; $comision = 1; $ganancia = 1;
 
         if ($config_woocatalogo) {
@@ -129,7 +129,7 @@ class cCatalogWooCatalog {
         }
 
         $jCatalog= json_encode(array('data' => $awooArray));
-        file_put_contents(WOOCATALOGO__PLUGIN_DIR.'/admin/dataWooCatalogo/dataWooCatalogo.json', $jCatalog);
+        file_put_contents(VENDOR_INTEGRATION_PLUGIN_DIR.'/admin/dataWooCatalogo/dataWooCatalogo.json', $jCatalog);
         echo "Actualización del catálogo completa";
         wp_die();
     }
@@ -140,7 +140,7 @@ class cCatalogWooCatalog {
 
         if (!$is_cron) {
             $nonce  = sanitize_text_field( $_POST['nonce'] );
-            if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
                 wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
             }
             if (!current_user_can('manage_options')) {
@@ -148,7 +148,7 @@ class cCatalogWooCatalog {
             }
         }
 
-        $oTagsDB = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+        $oTagsDB = (new cVendorIntegrationApiRequest())->fGetConfigValuesWooCatalogo();
         
         $args = array(
             'post_type' => 'product',
@@ -175,7 +175,7 @@ class cCatalogWooCatalog {
                 if ($product_id && $proveedor) {
 
                     $product = wc_get_product($product_id);
-                    $oGetPriceWooCatalogo = (new cWooCatalogoApiRequest())->fGetProductPriceStock($part_number, $sku_proveedor, $proveedor);
+                    $oGetPriceWooCatalogo = (new cVendorIntegrationApiRequest())->fGetProductPriceStock($part_number, $sku_proveedor, $proveedor);
 
                     $current_price = 99999999;
                     // Obtener el nuevo precio desde el webservice
@@ -234,7 +234,7 @@ class cCatalogWooCatalog {
 
         if (!$is_cron) {
             $nonce = sanitize_text_field( $_POST['nonce'] );
-            if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+            if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
                 wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
             }
             if (!current_user_can('manage_options')) {
@@ -265,7 +265,7 @@ class cCatalogWooCatalog {
 
                 if ($product_id && $proveedor) {
                     $product = wc_get_product($product_id);
-                    $oGetStockWooCatalogo = (new cWooCatalogoApiRequest())->fGetProductPriceStock($part_number, $sku_proveedor, $proveedor);
+                    $oGetStockWooCatalogo = (new cVendorIntegrationApiRequest())->fGetProductPriceStock($part_number, $sku_proveedor, $proveedor);
 
                     if (isset($oGetStockWooCatalogo->data[0]->stock) && $oGetStockWooCatalogo->data[0]->stock != 0) {
                         $stock = $oGetStockWooCatalogo->data[0]->stock;
@@ -295,7 +295,7 @@ class cCatalogWooCatalog {
     }
 
     public static function procesar_lote_productos() {
-        check_ajax_referer('actualizar_stock_nonce', 'nonce');
+        check_ajax_referer('vendor_integration_actualizar_stock_nonce', 'nonce');
     
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permisos insuficientes.');
@@ -329,7 +329,7 @@ class cCatalogWooCatalog {
         $productos = $query->posts;
         $total_productos = $query->found_posts;
         $actualizados = 0;
-        $oTagsDB = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+        $oTagsDB = (new cVendorIntegrationApiRequest())->fGetConfigValuesWooCatalogo();
         $new_price = 0; // Initialize
 
         foreach ($productos as $producto) {
@@ -344,7 +344,7 @@ class cCatalogWooCatalog {
                 $proveedor = get_post_meta($producto->ID, '_proveedor', true);
                 
                 if ($sku_proveedor && $proveedor) {
-                    $datos_api = (new cWooCatalogoApiRequest())->obtener_datos_producto_api($part_number, $sku_proveedor, $proveedor);
+                    $datos_api = (new cVendorIntegrationApiRequest())->obtener_datos_producto_api($part_number, $sku_proveedor, $proveedor);
                     
                     // Convert object return to array for array access if needed, or use object access
                     // The returned data from obter_datos_producto_api is object->data array->objects

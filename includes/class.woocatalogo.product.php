@@ -12,14 +12,14 @@ if (!defined('ABSPATH'))
  */
 
 
-class cProductWooCatalogo
+class cVendorIntegrationProduct
 {
 
     public static function fDeleteProductWooCatalogo($nonce)
     {
 
         $nonce = sanitize_text_field($_POST['nonce']);
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -46,7 +46,7 @@ class cProductWooCatalogo
 
         $nonce = sanitize_text_field($_POST['nonce']);
 
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -55,7 +55,7 @@ class cProductWooCatalogo
 
 
         $part_number = sanitize_text_field($_POST['part_number']);
-        $oUpdateProductWooCatalogo = (new cWooCatalogoApiRequest())->fGetCatalogExtendWooCatalogo($part_number);
+        $oUpdateProductWooCatalogo = (new cVendorIntegrationApiRequest())->fGetCatalogExtendWooCatalogo($part_number);
 
         // Verificamos si existe la clave 'data' en el objeto
         if (isset($oUpdateProductWooCatalogo->data) && is_array($oUpdateProductWooCatalogo->data)) {
@@ -108,7 +108,7 @@ class cProductWooCatalogo
     {
 
         $nonce = sanitize_text_field($_POST['nonce']);
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -117,12 +117,12 @@ class cProductWooCatalogo
         $part_number = sanitize_text_field($_POST['part_number']);
         $proveedor = sanitize_text_field($_POST['proveedor']);
 
-        $oCreateProductWooCatalogo = (new cWooCatalogoApiRequest())->fGetCatalogExtendWooCatalogo($part_number);
+        $oCreateProductWooCatalogo = (new cVendorIntegrationApiRequest())->fGetCatalogExtendWooCatalogo($part_number);
 
         $msg = "";
 
         // Get global settings
-        $config_woocatalogo = (new cWooCatalogoApiRequest())->fGetConfigValuesWooCatalogo();
+        $config_woocatalogo = (new cVendorIntegrationApiRequest())->fGetConfigValuesWooCatalogo();
         $dolar = 1;
         $comision = 1;
         $ganancia = 1;
@@ -243,19 +243,19 @@ class cProductWooCatalogo
                             switch ($empaquetado->nombre) {
                                 case 'Ancho del paquete':
                                 case 'Ancho':
-                                    $width = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
+                                    $width = cVendorIntegrationProduct::convertToCm($empaquetado->presentacion);
                                     break;
                                 case 'Profundidad del paquete':
                                 case 'Profundidad':
-                                    $length = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
+                                    $length = cVendorIntegrationProduct::convertToCm($empaquetado->presentacion);
                                     break;
                                 case 'Altura del paquete':
                                 case 'Altura':
-                                    $height = cProductWooCatalogo::convertToCm($empaquetado->presentacion);
+                                    $height = cVendorIntegrationProduct::convertToCm($empaquetado->presentacion);
                                     break;
                                 case 'Peso del paquete':
                                 case 'Peso':
-                                    $weight = cProductWooCatalogo::convertToKg($empaquetado->presentacion);
+                                    $weight = cVendorIntegrationProduct::convertToKg($empaquetado->presentacion);
                                     break;
                             }
                         }
@@ -386,14 +386,14 @@ class cProductWooCatalogo
                 $aGalleryData = $caracteristica->galeria;
             }
             if ($aImagenesData && $aGalleryData) {
-                cProductWooCatalogo::asignarImagenesProducto($product->get_id(), $aImagenesData, $aGalleryData);
+                cVendorIntegrationProduct::asignarImagenesProducto($product->get_id(), $aImagenesData, $aGalleryData);
             }
         }
 
         // Handle root-level image (fallback or primary if no complex features)
         if (!empty($producto->imagen)) {
             error_log("Debug WooCatalogo: Found root image for product ID " . $product->get_id() . ": " . $producto->imagen);
-            $image_id = cProductWooCatalogo::descargarSubirImagen($producto->imagen, $product->get_id());
+            $image_id = cVendorIntegrationProduct::descargarSubirImagen($producto->imagen, $product->get_id());
             if ($image_id) {
                 set_post_thumbnail($product->get_id(), $image_id);
                 error_log("Debug WooCatalogo: Set post thumbnail ID: " . $image_id);
@@ -412,7 +412,7 @@ class cProductWooCatalogo
         $main_image_url = $aImagenesData->grande; // Usando la URL 'grande' como imagen principal
 
         // Descargar la imagen principal y guardarla en la biblioteca multimedia de WordPress
-        $main_image_id = cProductWooCatalogo::descargarSubirImagen($main_image_url, $product_new_id);
+        $main_image_id = cVendorIntegrationProduct::descargarSubirImagen($main_image_url, $product_new_id);
 
         // Asignar la imagen principal al producto
         set_post_thumbnail($product_new_id, $main_image_id);
@@ -426,7 +426,7 @@ class cProductWooCatalogo
         // Descargar y subir las imágenes de la galería a la biblioteca multimedia de WordPress
         $gallery_image_ids = array();
         foreach ($gallery_image_urls as $gallery_image_url) {
-            $gallery_image_id = cProductWooCatalogo::descargarSubirImagen($gallery_image_url, $product_new_id);
+            $gallery_image_id = cVendorIntegrationProduct::descargarSubirImagen($gallery_image_url, $product_new_id);
             $gallery_image_ids[] = $gallery_image_id;
         }
 
@@ -451,7 +451,7 @@ class cProductWooCatalogo
 
         // Obtener el directorio de subida de WordPress
         $upload_dir = wp_upload_dir();
-        $image_name = basename(cProductWooCatalogo::generar_nombre_aleatorio() . ".jpg");
+        $image_name = basename(cVendorIntegrationProduct::generar_nombre_aleatorio() . ".jpg");
         $image_path = $upload_dir['path'] . '/' . $image_name;
 
         // Descargar la imagen desde la URL usando wp_remote_get
@@ -536,7 +536,7 @@ class cProductWooCatalogo
     {
 
         $nonce = sanitize_text_field($_POST['nonce']);
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -548,7 +548,7 @@ class cProductWooCatalogo
         // Frontend likely needs to send provider if we want specificity.
         // For now, passing empty strings for sku/provider to method which should be handled.
 
-        $oPriceWooCatalogo = (new cWooCatalogoApiRequest())->fGetProductPriceStock($part_number, '', '');
+        $oPriceWooCatalogo = (new cVendorIntegrationApiRequest())->fGetProductPriceStock($part_number, '', '');
 
         echo json_encode($oPriceWooCatalogo);
         wp_die();
@@ -557,7 +557,7 @@ class cProductWooCatalogo
     {
 
         $nonce = sanitize_text_field($_POST['nonce']);
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {
@@ -566,7 +566,7 @@ class cProductWooCatalogo
 
         $part_number = sanitize_text_field($_POST['part_number']);
         // Updated to use fGetProductPriceStock
-        $oStockWooCatalogo = (new cWooCatalogoApiRequest())->fGetProductPriceStock($part_number, '', '');
+        $oStockWooCatalogo = (new cVendorIntegrationApiRequest())->fGetProductPriceStock($part_number, '', '');
 
         echo json_encode($oStockWooCatalogo);
         wp_die();
@@ -576,7 +576,7 @@ class cProductWooCatalogo
     {
 
         $nonce = sanitize_text_field($_POST['nonce']);
-        if (!wp_verify_nonce($nonce, 'woocatalogo_admin')) {
+        if (!wp_verify_nonce($nonce, 'vendor_integration_admin')) {
             wp_die(__('Security check failed.', 'vendor-integration-woo'), 403);
         }
         if (!current_user_can('manage_options')) {

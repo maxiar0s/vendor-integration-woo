@@ -22,18 +22,18 @@ if ( !function_exists( 'add_action' ) ) {
 
 if(!defined('ABSPATH')){die('-1');}
 
-define( 'WOOCATALOGO__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'WOOCATALOGO__PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'WOOCATALOGO_DEBUG_MODE', true);
+define( 'VENDOR_INTEGRATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'VENDOR_INTEGRATION_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'VENDOR_INTEGRATION_DEBUG_MODE', true);
 
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/class.woocatalogo.php' );
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/class.woocatalogo.api.php' );
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/class.woocatalogo.admin.php' );
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/class.woocatalogo.catalog.php' );
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/class.woocatalogo.product.php' );
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/interfaces/interface.woocatalogo.provider.php' );
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/abstracts/abstract.woocatalogo.provider.php' );
-require_once( WOOCATALOGO__PLUGIN_DIR . '/includes/providers/class.provider.nexsys.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.api.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.admin.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.catalog.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/class.woocatalogo.product.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/interfaces/interface.woocatalogo.provider.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/abstracts/abstract.woocatalogo.provider.php' );
+require_once( VENDOR_INTEGRATION_PLUGIN_DIR . '/includes/providers/class.provider.nexsys.php' );
 
 // WooCommerce dependency check
 add_action('plugins_loaded', function() {
@@ -47,59 +47,59 @@ add_action('plugins_loaded', function() {
     }
 
     // Only init plugin hooks if WooCommerce is active
-    add_action( 'init', array( 'cWooCatalogo', 'init' ));
+    add_action( 'init', array( 'cVendorIntegrationWoo', 'init' ));
 });
 
-register_activation_hook  ( __FILE__, array( 'cWooCatalogoAdmin', 'fPluginActivationWooCatalogo'  ));
-register_deactivation_hook( __FILE__, array( 'cWooCatalogoAdmin', 'fPluginDeactivationWooCatalogo'));
+register_activation_hook  ( __FILE__, array( 'cVendorIntegrationAdmin', 'fPluginActivationWooCatalogo'  ));
+register_deactivation_hook( __FILE__, array( 'cVendorIntegrationAdmin', 'fPluginDeactivationWooCatalogo'));
 
 /////ACTIVAR LA FUNCION CADA CIERTO TIEMPO
 //CREAR EL CRON CUANDO EL PLUGINS SE ACTIVE
-add_filter( 'cron_schedules', 'wpshout_add_cron_interval2' );
-function wpshout_add_cron_interval2( $schedules ) {
+add_filter( 'cron_schedules', 'vendor_integration_add_cron_interval' );
+function vendor_integration_add_cron_interval( $schedules ) {
     $schedules['every1hrs'] = array(
             'interval'  => 3600, // time in seconds
             'display'   => 'Every 1 hours'
     );
     return $schedules;
 }
-function run_on_activate2(){
+function vendor_integration_run_on_activate(){
 
-    if( !wp_next_scheduled( 'CronActualizarCatalogoStock' ) ) {
-        wp_schedule_event( time(), 'every1hrs', 'CronActualizarCatalogoStock' );
+    if( !wp_next_scheduled( 'vendor_integration_cron_update_stock' ) ) {
+        wp_schedule_event( time(), 'every1hrs', 'vendor_integration_cron_update_stock' );
     }
-    if( !wp_next_scheduled( 'CronActualizarCatalogoPrice' ) ) {
-        wp_schedule_event( time(), 'every1hrs', 'CronActualizarCatalogoPrice' );
+    if( !wp_next_scheduled( 'vendor_integration_cron_update_price' ) ) {
+        wp_schedule_event( time(), 'every1hrs', 'vendor_integration_cron_update_price' );
     }
-    if( !wp_next_scheduled( 'CronActualizarCatalogo' ) ) {
-        wp_schedule_event( time(), 'every1hrs', 'CronActualizarCatalogo' );
+    if( !wp_next_scheduled( 'vendor_integration_cron_update_catalog' ) ) {
+        wp_schedule_event( time(), 'every1hrs', 'vendor_integration_cron_update_catalog' );
     }
 
 }
-register_activation_hook( __FILE__, 'run_on_activate2' );
+register_activation_hook( __FILE__, 'vendor_integration_run_on_activate' );
 
 
 //DESACTIVA EL CRON CUANDO EL PLUGINS SE DESACTIVA
-function run_on_deactivate2() {
-    wp_clear_scheduled_hook('CronActualizarCatalogoStock');
-    wp_clear_scheduled_hook('CronActualizarCatalogoPrice');
-    wp_clear_scheduled_hook('CronActualizarCatalogo');
+function vendor_integration_run_on_deactivate() {
+    wp_clear_scheduled_hook('vendor_integration_cron_update_stock');
+    wp_clear_scheduled_hook('vendor_integration_cron_update_price');
+    wp_clear_scheduled_hook('vendor_integration_cron_update_catalog');
 
 }
-register_deactivation_hook( __FILE__, 'run_on_deactivate2' );
+register_deactivation_hook( __FILE__, 'vendor_integration_run_on_deactivate' );
 
 // Cron handlers — call methods directly with $is_cron = true to skip nonce verification
-function ActualizarPrecioCatalogCreateNonce(){
-    cCatalogWooCatalog::fUpdatePriceWooCatalogo(null, true);
+function vendor_integration_update_price_cron(){
+    cVendorIntegrationCatalog::fUpdatePriceWooCatalogo(null, true);
 }
-add_action ('CronActualizarCatalogoPrice', 'ActualizarPrecioCatalogCreateNonce', 10, 0);
+add_action ('vendor_integration_cron_update_price', 'vendor_integration_update_price_cron', 10, 0);
 
-function ActualizarStockCatalogoCreateNonce(){
-    cCatalogWooCatalog::fUpdateStockWooCatalogo(null, true);
+function vendor_integration_update_stock_cron(){
+    cVendorIntegrationCatalog::fUpdateStockWooCatalogo(null, true);
 }
-add_action ('CronActualizarCatalogoStock', 'ActualizarStockCatalogoCreateNonce', 10, 0);
+add_action ('vendor_integration_cron_update_stock', 'vendor_integration_update_stock_cron', 10, 0);
 
-function ActualizarCatalogoCreateNonce(){
-    cCatalogWooCatalog::fUpdateJsonCatalog(null, true);
+function vendor_integration_update_catalog_cron(){
+    cVendorIntegrationCatalog::fUpdateJsonCatalog(null, true);
 }
-add_action ('CronActualizarCatalogo', 'ActualizarCatalogoCreateNonce', 10, 0);
+add_action ('vendor_integration_cron_update_catalog', 'vendor_integration_update_catalog_cron', 10, 0);

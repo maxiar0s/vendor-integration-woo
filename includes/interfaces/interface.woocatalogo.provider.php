@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-interface WooCatalogoProviderInterface {
+interface VendorIntegrationProviderInterface {
     
     /**
      * Authenticate with the provider API.
