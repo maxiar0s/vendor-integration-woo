@@ -5,7 +5,7 @@
  * Plugin Name: Vendor Integration Woo
  * Plugin URI:  https://siroe.cl
  * Description: Integración de catálogos de proveedores para WooCommerce.
- * Version:     1.0.0
+ * Version:     1.0.2
  * Author:      Siroe
  * Author URI:  https://www.siroe.cl
  * Text Domain: vendor-integration-woo

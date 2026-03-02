@@ -178,7 +178,7 @@ class cVendorIntegrationProduct
                         $product->set_sku($producto->part_number);
 
                         $price = isset($producto->precio) && is_numeric($producto->precio) ? floatval($producto->precio) : 0;
-                        $moneda = isset($producto->moneda) ? $producto->moneda : 'USD';
+                        $moneda = isset($producto->moneda) ? strtoupper(trim((string) $producto->moneda)) : 'USD';
 
                         // If currency is CLP, do not apply Dolar conversion (factor = 1)
                         $tipo_cambio = ($moneda === 'CLP') ? 1 : $dolar;
@@ -188,6 +188,19 @@ class cVendorIntegrationProduct
                             $final_price = ceil($price * $tipo_cambio * $ganancia * $comision);
                         } else {
                             $final_price = 99999999;
+                        }
+
+                        if (defined('VENDOR_INTEGRATION_DEBUG_MODE') && VENDOR_INTEGRATION_DEBUG_MODE) {
+                            error_log(
+                                'Vendor Integration Debug [insert_product] '
+                                . 'Ref: ' . $producto->part_number
+                                . ' | Moneda: ' . strtoupper(trim((string) $moneda))
+                                . ' | Precio base API: ' . floatval($price)
+                                . ' | Ganancia: ' . floatval($ganancia)
+                                . ' | Comision: ' . floatval($comision)
+                                . ' | Tipo cambio: ' . floatval($tipo_cambio)
+                                . ' | Total: ' . floatval($final_price)
+                            );
                         }
 
                         $product->set_regular_price($final_price);

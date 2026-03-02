@@ -1,10 +1,10 @@
 jQuery(document).ready(function($) {
-    $('#iniciar-actualizacion').on('click', function() {
+    $('#viw-iniciar-actualizacion').on('click', function() {
         var $boton = $(this);
-        var $barraProgreso = $('#barra-progreso');
-        var $estadoProgreso = $('#estado-progreso');
-        var $porcentajeProgreso = $('#porcentaje-progreso');
-        var $contenedorProgreso = $('#progreso-actualizacion');
+        var $barraProgreso = $('#viw-barra-progreso');
+        var $estadoProgreso = $('#viw-estado-progreso');
+        var $porcentajeProgreso = $('#viw-porcentaje-progreso');
+        var $contenedorProgreso = $('#viw-progreso-actualizacion');
 
         $boton.prop('disabled', true);
         //$contenedorProgreso.show();

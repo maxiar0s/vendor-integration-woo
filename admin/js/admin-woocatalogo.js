@@ -337,6 +337,21 @@ jQuery(document).ready(function () {
   jQuery("#viwOpenConfigModalWooCatalogo").click(function (e) {
     e.preventDefault();
     hideBusyOverlay();
+    var $selectEtiqueta = jQuery("#categories-woocatalogo");
+    if ($selectEtiqueta.length) {
+      if ($selectEtiqueta.find("option[value='Bodega Externa']").length === 0) {
+        $selectEtiqueta.prepend(
+          jQuery("<option>", {
+            value: "Bodega Externa",
+            text: "Bodega Externa",
+          }),
+        );
+      }
+
+      if (!$selectEtiqueta.val()) {
+        $selectEtiqueta.val("Bodega Externa").trigger("change");
+      }
+    }
     jQuery("#viw-popup").addClass("is-visible");
   });
 

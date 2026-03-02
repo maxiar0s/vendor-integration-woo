@@ -12,6 +12,32 @@ if (!defined('ABSPATH')) exit;
 
 class cVendorIntegrationAdmin {
 
+    private static function parseDecimalField($value, $fallback = 1)
+    {
+        if (is_array($value) || is_object($value)) {
+            return $fallback;
+        }
+
+        $number = trim((string) $value);
+        if ($number === '') {
+            return $fallback;
+        }
+
+        if (strpos($number, ',') !== false && strpos($number, '.') !== false) {
+            $number = str_replace('.', '', $number);
+            $number = str_replace(',', '.', $number);
+        } elseif (strpos($number, ',') !== false) {
+            $number = str_replace(',', '.', $number);
+        }
+
+        if (!is_numeric($number)) {
+            return $fallback;
+        }
+
+        $normalized = floatval($number);
+        return ($normalized > 0) ? $normalized : $fallback;
+    }
+
     public static function fAdminNoticesWooCatalogo() {
         $error = get_transient('vendor_integration_nexsys_auth_error');
         if ($error) {
@@ -252,13 +278,50 @@ class cVendorIntegrationAdmin {
                                     <label for="categories-woocatalogo">Etiquetas</label>
                                     <select name="categories-woocatalogo" id="categories-woocatalogo" style="width:100%">
                                     <?php
-                                        $all_tags = get_terms ('product_tag');
-                                        if($all_tags){
+                                        $default_tag_name = 'Bodega Externa';
+                                        $selected_tag_name = $default_tag_name;
+                                        if (!empty($config_woocatalogo) && is_array($config_woocatalogo)) {
+                                            $latest_config = end($config_woocatalogo);
+                                            if (isset($latest_config['etiquetas_precio']) && trim((string) $latest_config['etiquetas_precio']) !== '') {
+                                                $selected_tag_name = (string) $latest_config['etiquetas_precio'];
+                                            }
+                                        }
+
+                                        $all_tags = get_terms(array(
+                                            'taxonomy' => 'product_tag',
+                                            'hide_empty' => false,
+                                        ));
+
+                                        $tag_names = array();
+                                        if (!is_wp_error($all_tags) && !empty($all_tags)) {
                                             foreach ($all_tags as $tag) {
-                                                echo ' <option value="'.esc_attr($tag->name).'">'.esc_html($tag->name).'</option>';
-                                            } 
-                                        }else{
-                                            echo ' <option value="false">Sin resultados</option>';
+                                                if (!isset($tag->name)) {
+                                                    continue;
+                                                }
+                                                $tag_names[] = (string) $tag->name;
+                                            }
+                                        }
+
+                                        if (!in_array($default_tag_name, $tag_names, true)) {
+                                            $tag_names[] = $default_tag_name;
+                                        }
+
+                                        if (!in_array($selected_tag_name, $tag_names, true)) {
+                                            $tag_names[] = $selected_tag_name;
+                                        }
+
+                                        natcasesort($tag_names);
+
+                                        $selected = selected($default_tag_name, $selected_tag_name, false);
+                                        echo '<option value="' . esc_attr($default_tag_name) . '" ' . $selected . '>' . esc_html($default_tag_name) . '</option>';
+
+                                        foreach ($tag_names as $tag_name) {
+                                            if ($tag_name === $default_tag_name) {
+                                                continue;
+                                            }
+
+                                            $selected = selected($tag_name, $selected_tag_name, false);
+                                            echo '<option value="' . esc_attr($tag_name) . '" ' . $selected . '>' . esc_html($tag_name) . '</option>';
                                         }
     
                                     ?>
@@ -425,12 +488,12 @@ class cVendorIntegrationAdmin {
                     <h2>Sincroniza el stock y precio de tu tienda con los proveedores.</h2>
                     <p>NOTA: Los productos a actualizar son aquellos publicados mediante el plugin. El conteo se realiza considerando únicamente los que tienen completados los campos "SKU proveedor" y "Proveedor".</p>
                 </header>
-                <div id="progreso-actualizacion" style="margin: 20px 0px;background: #f2f2f2;">
-                    <div id="barra-progreso" style="width: 0%; height: 30px; background-color: #0073aa;border: 1px solid #cccccc;border-radius: 3px;"></div>
+                <div id="viw-progreso-actualizacion" style="margin: 20px 0px;background: #f2f2f2;">
+                    <div id="viw-barra-progreso" style="width: 0%; height: 30px; background-color: #0073aa;border: 1px solid #cccccc;border-radius: 3px;"></div>
                 </div>
-                <button id="iniciar-actualizacion" class="button button-primary">Iniciar Actualización</button>
-                <p id="porcentaje-progreso" style="font-size: larger;">0% de productos revisados</p> 
-                <p id="estado-progreso" style="font-size: larger;">0 productos actualizados -  0 productos encontrados</p> 
+                <button id="viw-iniciar-actualizacion" class="button button-primary">Iniciar Actualización</button>
+                <p id="viw-porcentaje-progreso" style="font-size: larger;">0% de productos revisados</p> 
+                <p id="viw-estado-progreso" style="font-size: larger;">0 productos actualizados -  0 productos encontrados</p> 
                 
             </div>
         <div class="popup-overlay"></div>
@@ -453,10 +516,23 @@ class cVendorIntegrationAdmin {
 
         global $wpdb;
         $aDataNumberWooCatalogo = isset($_POST['dataNumberWooCatalogo']) ? $_POST['dataNumberWooCatalogo'] : array();
-        $sfmultWooCatalogo      = isset($aDataNumberWooCatalogo[0]['value']) ? floatval($aDataNumberWooCatalogo[0]['value']) : 0;
-        $sComWooCatalogo        = isset($aDataNumberWooCatalogo[1]['value']) ? floatval($aDataNumberWooCatalogo[1]['value']) : 0;
-        $sDolarWooCatalogo      = isset($aDataNumberWooCatalogo[2]['value']) ? floatval($aDataNumberWooCatalogo[2]['value']) : 0;
-        $aTagWooCatalogo        = isset($aDataNumberWooCatalogo[3]['value']) ? sanitize_text_field($aDataNumberWooCatalogo[3]['value']) : '';
+        $aDataByNameWooCatalogo = array();
+
+        if (is_array($aDataNumberWooCatalogo)) {
+            foreach ($aDataNumberWooCatalogo as $field) {
+                if (!is_array($field) || !isset($field['name'])) {
+                    continue;
+                }
+
+                $field_name = sanitize_text_field($field['name']);
+                $aDataByNameWooCatalogo[$field_name] = isset($field['value']) ? $field['value'] : '';
+            }
+        }
+
+        $sfmultWooCatalogo      = self::parseDecimalField(isset($aDataByNameWooCatalogo['ganancia-woocatalogo']) ? $aDataByNameWooCatalogo['ganancia-woocatalogo'] : 1, 1);
+        $sComWooCatalogo        = self::parseDecimalField(isset($aDataByNameWooCatalogo['comision-woocatalogo']) ? $aDataByNameWooCatalogo['comision-woocatalogo'] : 1, 1);
+        $sDolarWooCatalogo      = self::parseDecimalField(isset($aDataByNameWooCatalogo['dolar-woocatalogo']) ? $aDataByNameWooCatalogo['dolar-woocatalogo'] : 1, 1);
+        $aTagWooCatalogo        = isset($aDataByNameWooCatalogo['categories-woocatalogo']) ? sanitize_text_field($aDataByNameWooCatalogo['categories-woocatalogo']) : '';
         $dTimeWooCatalogo       = current_time('mysql');
         $sTableWooCatalogo      = $wpdb->prefix.'vendor_integration';
         $qWooCatalogo           = "SELECT * FROM $sTableWooCatalogo";
